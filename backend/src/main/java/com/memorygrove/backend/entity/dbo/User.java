@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
 public class User {
 
@@ -66,7 +68,7 @@ public class User {
     private LocalDate birthDate;
 
     /**
-     * ID пола пользователя
+     * Пол пользователя
      */
     @NotNull(message = "Поле 'Пол' обязательно")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -74,7 +76,7 @@ public class User {
     private Sex sex;
 
     /**
-     * ID роли пользователя
+     * Роль пользователя
      */
     @NotNull(message = "Поле 'Роль' обязательно")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -107,6 +109,13 @@ public class User {
     private String address;
 
     /**
+     * Описание аккаунта пользователя
+     */
+    @Size(max = 500, message = "Длина описания должна быть до 500 символов")
+    @Column(name = "description")
+    private String description;
+
+    /**
      * Хэш пароля пользователя
      */
     @Column(name = "password_hash", nullable = false)
@@ -126,8 +135,32 @@ public class User {
     private LocalDateTime lastLoginAt;
 
     /**
+     * Статус активности пользователя
+     * (если пользователь перестал использовать сервис, то вместо удаления аккаунта флаг устанавливается в false)
+     *
+     * true - активен
+     * false - неактивен
+     */
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+
+    /**
+     * Дата и время деактивации пользователя
+     */
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
+    /**
+     * Причина деактивации пользователя
+     */
+    @Size(max = 500, message = "Длина причины деактивации должна быть до 500 символов")
+    @Column(name = "deactivation_reason")
+    private String deactivationReason;
+
+    /**
      * Получение полного имени пользователя
      */
+    @Transient
     public String getFullName() {
         return String.format("%s %s %s", surname, name, middleName).trim();
     }
@@ -135,6 +168,7 @@ public class User {
     /**
      * Получение возраста пользователя
      */
+    @Transient
     public Integer getAge() {
         if (birthDate == null) {
             return null;
@@ -146,6 +180,7 @@ public class User {
     /**
      * Проверка роли пользователя на то, является ли он пациентом
      */
+    @Transient
     public boolean isPatient() {
         return role != null && Role.Constants.PATIENT.equals(role.getId());
     }
@@ -153,6 +188,7 @@ public class User {
     /**
      * Проверка роли пользователя на то, является ли он доктором
      */
+    @Transient
     public boolean isDoctor() {
         return role != null && Role.Constants.DOCTOR.equals(role.getId());
     }
@@ -160,7 +196,26 @@ public class User {
     /**
      * Проверка роли пользователя на то, является ли он администратором
      */
+    @Transient
     public boolean isAdministrator() {
         return role != null && Role.Constants.ADMINISTRATOR.equals(role.getId());
+    }
+
+    /**
+     * Проверка роли пользователя на то, является ли он "доверенным лицом"
+     */
+    @Transient
+    public boolean isTrustedContact() {
+        if (role == null) {
+            return false;
+        }
+
+        UUID roleId = role.getId();
+
+        return Role.Constants.FAMILY_MEMBER.equals(roleId) ||
+                Role.Constants.OTHER_HALF.equals(roleId) ||
+                Role.Constants.FRIEND.equals(roleId) ||
+                Role.Constants.COLLEAGUE.equals(roleId) ||
+                Role.Constants.OTHER.equals(roleId);
     }
 }

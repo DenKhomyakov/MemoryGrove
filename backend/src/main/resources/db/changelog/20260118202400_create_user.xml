@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260118202400" author="KhomyakovDA">
+
+        <createTable tableName="users" remarks="Пользователь">
+
+            <column name="id" type="UUID" remarks="ID пользователя">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="surname" type="VARCHAR(50)" remarks="Фамилия">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(50)" remarks="Имя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="middle_name" type="VARCHAR(50)" remarks="Отчество">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="birth_date" type="date" remarks="Дата рождения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sex_id" type="UUID" remarks="Пол">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="role_id" type="UUID" remarks="Роль">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="email" type="VARCHAR(100)" remarks="Электронная почта">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="phone" type="VARCHAR(20)" remarks="Номер телефона">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="address" type="VARCHAR(250)" remarks="Адрес">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)" remarks="Описание">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="password_hash" type="text" remarks="Хэш пароля">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата и время создания аккаунта">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_login_at" type="TIMESTAMP" remarks="Дата и время последней авторизации">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="is_active" type="boolean" defaultValueBoolean="true" remarks="Статус активности">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deactivated_at" type="TIMESTAMP" remarks="Дата и время деактивации">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="deactivation_reason" type="VARCHAR(500)" remarks="Причина деактивации">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="users"
+                baseColumnNames="sex_id"
+                constraintName="fk_users_sex"
+                referencedTableName="sexes"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+
+        <addForeignKeyConstraint
+                baseTableName="users"
+                baseColumnNames="role_id"
+                constraintName="fk_users_role"
+                referencedTableName="roles"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+
+        <addUniqueConstraint
+                tableName="users"
+                columnNames="email"
+                constraintName="uk_users_email"/>
+
+        <addUniqueConstraint
+                tableName="users"
+                columnNames="phone"
+                constraintName="uk_users_phone"/>
+
+        <createIndex tableName="users" indexName="idx_user_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_phone">
+            <column name="phone"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_created_at">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_is_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <rollback>
+
+            <dropTable tableName="users"/>
+
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

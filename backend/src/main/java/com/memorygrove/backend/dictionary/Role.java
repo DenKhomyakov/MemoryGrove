@@ -1,5 +1,6 @@
 package com.memorygrove.backend.dictionary;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 /**
- * Роль пользователя в системе
+ * Справочник ролей пользователя
  *
  * PATIENT - Пациент
  * DOCTOR - Доктор
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "roles")
 public class Role {
 
