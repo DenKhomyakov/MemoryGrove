@@ -61,6 +61,8 @@ public class UserService {
         Role role = findRoleById(userCreateDto.getRole().getId());
 
         User user = createUserFromDto(userCreateDto, sex, role);
+        log.info("Создание пользователя с паролем (хеш): {}", user.getPasswordHash());
+
         User savedUser = userRepository.save(user);
         log.info(
                 "Пользователь успешно зарегистрирован!"
@@ -147,7 +149,6 @@ public class UserService {
 
         User user = findUserById(userId);
 
-        // ToDo: Убедиться, что проверка работает корректно (есть подозрение, что нужно кодировать пароль из dto перед проверкой)
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPasswordHash())) {
             log.warn("Неверный текущий пароль для пользователя с ID {}", userId);
             throw new IllegalArgumentException("Неверный текущий пароль");
