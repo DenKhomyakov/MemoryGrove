@@ -42,7 +42,7 @@ Memory Grove - это специализированный некоммерче�
 # Используемые технологии
 Стек, применяемый для разработки веб-сервиса:
 1) Backend: Java 24 (JDK Amazon Corretto 24.0.2.12) + Spring Boot 3.5.9
-2) Frontend: JavaScript + Vue 3
+2) Frontend: JavaScript + Node.js (v24.13.1) + Vue 3
 3) База данных: PostgreSQL (18.0) + Liquibase + JPA/Hibernate
 4) Система сборки: Gradle
 # Среды разработки
