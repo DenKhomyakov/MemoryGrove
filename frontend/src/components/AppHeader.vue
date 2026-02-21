@@ -33,28 +33,50 @@ import authService from '@/services/authService'
 const router = useRouter()
 const isAuthenticated = ref(false)
 
+// Функция проверки авторизации
 const checkAuth = () => {
-  isAuthenticated.value = authService.isAuthenticated()
+  const newAuthState = authService.isAuthenticated()
+  console.log('🔄 Проверка авторизации:', newAuthState ? 'авторизован' : 'не авторизован')
+  isAuthenticated.value = newAuthState
 }
 
+// Слушаем изменения в localStorage
+const handleStorageChange = (event) => {
+  if (event.key === 'accessToken' || event.key === 'refreshToken') {
+    console.log('🔄 Изменение в localStorage, обновляем состояние')
+    checkAuth()
+  }
+}
+
+// Кастомное событие для обновления авторизации
 const handleAuthChange = () => {
+  console.log('🔄 Получено событие auth-change')
   checkAuth()
 }
 
 onMounted(() => {
   checkAuth()
-  window.addEventListener('auth-change', handleAuthChange)
-  window.addEventListener('storage', checkAuth)
-})
 
-onUnmounted(() => {
-  window.removeEventListener('auth-change', handleAuthChange)
-  window.removeEventListener('storage', checkAuth)
+  // Слушаем изменения в localStorage (между вкладками)
+  window.addEventListener('storage', handleStorageChange)
+
+  // Слушаем кастомное событие (внутри текущей вкладки)
+  window.addEventListener('auth-change', handleAuthChange)
+
+  // Периодическая проверка (на всякий случай)
+  const interval = setInterval(checkAuth, 1000)
+
+  onUnmounted(() => {
+    window.removeEventListener('storage', handleStorageChange)
+    window.removeEventListener('auth-change', handleAuthChange)
+    clearInterval(interval)
+  })
 })
 
 const logout = () => {
   authService.logout()
-  isAuthenticated.value = false
+  checkAuth()
+  // Триггерим событие для других компонентов
   window.dispatchEvent(new Event('auth-change'))
   router.push('/login')
 }

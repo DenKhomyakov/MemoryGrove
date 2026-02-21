@@ -18,6 +18,9 @@ class AuthService {
       localStorage.setItem('refreshToken', refreshToken)
 
       console.log('✅ Вход выполнен успешно')
+      window.dispatchEvent(new Event('auth-change'))
+      window.dispatchEvent(new Event('storage'))
+
       return response.data
     } catch (error) {
       console.error('❌ Ошибка входа:', error.response?.data || error.message)
@@ -31,6 +34,9 @@ class AuthService {
   logout() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+
+    window.dispatchEvent(new Event('auth-change'))
+    window.dispatchEvent(new Event('storage'))
     console.log('👋 Выход выполнен')
   }
 
@@ -51,6 +57,9 @@ class AuthService {
       const { accessToken, refreshToken: newRefreshToken } = response.data
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('refreshToken', newRefreshToken)
+
+      window.dispatchEvent(new Event('auth-change'))
+      window.dispatchEvent(new Event('storage'))
 
       console.log('✅ Токен обновлен')
       return response.data
