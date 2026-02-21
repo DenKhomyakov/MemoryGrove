@@ -2,9 +2,7 @@
   <div id="app">
     <AppHeader />
     <main class="main-content">
-      <div class="content-container">
-        <router-view />
-      </div>
+      <router-view />
     </main>
   </div>
 </template>
@@ -14,12 +12,18 @@ import AppHeader from '@/components/AppHeader.vue'
 </script>
 
 <style>
+/* Сброс отступов у body и html */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
@@ -40,18 +44,21 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .main-content {
   flex: 1;
   width: 100%;
-  background: var(--color-white-smoke, #f5f5f5);
-}
-
-.content-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  background: var(--color-white-smoke, #f5f5f5);
+}
+
+/* Убираем отступы у контейнеров внутри main-content */
+.main-content > * {
   width: 100%;
 }
 </style>

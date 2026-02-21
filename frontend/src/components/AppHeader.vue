@@ -37,7 +37,6 @@ const checkAuth = () => {
   isAuthenticated.value = authService.isAuthenticated()
 }
 
-// Создаем кастомное событие для обновления авторизации
 const handleAuthChange = () => {
   checkAuth()
 }
@@ -56,7 +55,6 @@ onUnmounted(() => {
 const logout = () => {
   authService.logout()
   isAuthenticated.value = false
-  // Триггерим событие обновления авторизации
   window.dispatchEvent(new Event('auth-change'))
   router.push('/login')
 }
@@ -69,12 +67,20 @@ const logout = () => {
   box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.1));
   position: sticky;
   top: 0;
-  z-index: 100;
-  width: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100vw; /* Полная ширина viewport */
+  margin: 0;
+  padding: 0;
+  transform: translateZ(0); /* Для фиксации позиции */
+  backdrop-filter: blur(8px); /* Красивый эффект при прокрутке */
+  background-color: rgba(255, 255, 255, 0.95); /* Полупрозрачный фон */
 }
 
 .header-container {
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 20px;
 }
