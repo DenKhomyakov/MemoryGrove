@@ -163,6 +163,14 @@
         </span>
       </div>
     </div>
+
+    <Notification
+      v-if="showNotification"
+      :type="notificationType"
+      :message="notificationMessage"
+      :duration="3000"
+      @close="showNotification = false"
+    />
   </div>
 </template>
 
@@ -175,11 +183,15 @@ import DateInput from '@/components/UI/DateInput.vue'
 import Select from '@/components/UI/Select.vue'
 import PasswordField from '@/components/UI/PasswordField.vue'
 import Button from '@/components/UI/Button.vue'
+import Notification from '@/components/UI/Notification.vue'
 import userService from '@/services/userService'
 
 const router = useRouter()
 const loading = ref(false)
-const successMessage = ref('')
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref('success')
+
 const errors = reactive({
   form: '',
   email: '',
@@ -227,6 +239,13 @@ const registerForm = reactive({
   password: '',
   confirmPassword: ''
 })
+
+// Показать уведомление
+const showNotificationMessage = (type, message) => {
+  notificationType.value = type
+  notificationMessage.value = message
+  showNotification.value = true
+}
 
 // Валидация формы
 const validateForm = () => {
@@ -335,7 +354,6 @@ const handleRegister = async () => {
   if (!validateForm()) return
 
   loading.value = true
-  successMessage.value = ''
   errors.form = ''
 
   try {
@@ -364,12 +382,14 @@ const handleRegister = async () => {
     const response = await userService.register(userData)
 
     console.log('✅ Регистрация успешна!', response)
-    successMessage.value = 'Регистрация прошла успешно! Сейчас вы будете перенаправлены на страницу входа.'
 
-    // Через 2 секунды перенаправляем на страницу входа
+    // Показываем уведомление об успехе
+    showNotificationMessage('success', 'Поздравляем, вы успешно зарегистрировались! Перенаправляем вас на страницу входа...')
+
+    // Через 3 секунды перенаправляем на страницу входа
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 3000)
 
   } catch (error) {
     console.error('❌ Ошибка регистрации:', error)
@@ -380,16 +400,32 @@ const handleRegister = async () => {
         case 400:
           errors.form = error.response.data?.message || 'Некорректные данные'
           break
+        case 403:
+          errors.form = error.response.data?.message || 'Номер телефона или email уже заняты'
+          break
         case 409:
-          errors.form = 'Пользователь с таким email или телефоном уже существует'
+          // Проверяем, что именно занято
+          const errorMessage = error.response.data?.message || ''
+          if (errorMessage.includes('email') && errorMessage.includes('телефон')) {
+            showNotificationMessage('error', 'Данный номер телефона и email уже заняты')
+          } else if (errorMessage.includes('email')) {
+            showNotificationMessage('error', 'Данный email уже занят')
+          } else if (errorMessage.includes('телефон')) {
+            showNotificationMessage('error', 'Данный номер телефона уже занят')
+          } else {
+            showNotificationMessage('error', 'Пользователь с таким email или телефоном уже существует')
+          }
           break
         default:
           errors.form = 'Ошибка сервера. Попробуйте позже.'
+          showNotificationMessage('error', 'Ошибка сервера. Попробуйте позже.')
       }
     } else if (error.request) {
       errors.form = 'Нет ответа от сервера. Проверьте подключение.'
+      showNotificationMessage('error', 'Нет ответа от сервера. Проверьте подключение.')
     } else {
       errors.form = 'Ошибка при отправке запроса'
+      showNotificationMessage('error', 'Ошибка при отправке запроса')
     }
   } finally {
     loading.value = false

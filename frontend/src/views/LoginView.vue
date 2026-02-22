@@ -48,6 +48,14 @@
         </span>
       </div>
     </Card>
+
+    <Notification
+      v-if="showNotification"
+      :type="notificationType"
+      :message="notificationMessage"
+      :duration="3000"
+      @close="showNotification = false"
+    />
   </div>
 </template>
 
@@ -58,10 +66,14 @@ import Card from '@/components/UI/Card.vue'
 import TextField from '@/components/UI/TextField.vue'
 import PasswordField from '@/components/UI/PasswordField.vue'
 import Button from '@/components/UI/Button.vue'
+import Notification from '@/components/UI/Notification.vue'
 import authService from '@/services/authService'
 
 const router = useRouter()
 const loading = ref(false)
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref('error')
 const errors = reactive({})
 
 const loginForm = reactive({
@@ -100,6 +112,13 @@ const handleLogin = async () => {
     await authService.login(loginForm.email, loginForm.password)
     router.push('/')
   } catch (error) {
+    console.error('❌ Ошибка входа:', error)
+
+    // Показываем уведомление об ошибке
+    notificationMessage.value = 'Неверные учётные данные для входа'
+    notificationType.value = 'error'
+    showNotification.value = true
+
     errors.form = error.response?.data?.message || 'Ошибка входа'
   } finally {
     loading.value = false
