@@ -6,16 +6,6 @@
         <p>Создайте новую учётную запись</p>
       </div>
 
-      <!-- Сообщение об ошибке -->
-      <div v-if="errors.form" class="error-banner">
-        {{ errors.form }}
-      </div>
-
-      <!-- Сообщение об успехе -->
-      <div v-if="successMessage" class="success-banner">
-        {{ successMessage }}
-      </div>
-
       <form @submit.prevent="handleRegister" class="auth-form">
         <div class="form-row">
           <TextField
@@ -193,7 +183,6 @@ const notificationMessage = ref('')
 const notificationType = ref('success')
 
 const errors = reactive({
-  form: '',
   email: '',
   phone: '',
   surname: '',
@@ -249,11 +238,7 @@ const showNotificationMessage = (type, message) => {
 
 // Валидация формы
 const validateForm = () => {
-  // Очищаем предыдущие ошибки
-  Object.keys(errors).forEach(key => {
-    if (key !== 'form') errors[key] = ''
-  })
-  errors.form = ''
+  Object.keys(errors).forEach(key => errors[key] = '')
 
   let isValid = true
 
@@ -354,7 +339,6 @@ const handleRegister = async () => {
   if (!validateForm()) return
 
   loading.value = true
-  errors.form = ''
 
   try {
     // Формируем данные для отправки на бэкенд
@@ -398,10 +382,10 @@ const handleRegister = async () => {
       // Обработка разных кодов ошибок
       switch (error.response.status) {
         case 400:
-          errors.form = error.response.data?.message || 'Некорректные данные'
+          showNotificationMessage('error', error.response.data?.message || 'Некорректные данные')
           break
         case 403:
-          errors.form = error.response.data?.message || 'Номер телефона или email уже заняты'
+          showNotificationMessage('error', error.response.data?.message || 'Номер телефона или email уже заняты')
           break
         case 409:
           // Проверяем, что именно занято
@@ -417,14 +401,11 @@ const handleRegister = async () => {
           }
           break
         default:
-          errors.form = 'Ошибка сервера. Попробуйте позже.'
           showNotificationMessage('error', 'Ошибка сервера. Попробуйте позже.')
       }
     } else if (error.request) {
-      errors.form = 'Нет ответа от сервера. Проверьте подключение.'
       showNotificationMessage('error', 'Нет ответа от сервера. Проверьте подключение.')
     } else {
-      errors.form = 'Ошибка при отправке запроса'
       showNotificationMessage('error', 'Ошибка при отправке запроса')
     }
   } finally {
@@ -465,26 +446,6 @@ const handleRegister = async () => {
 .auth-header p {
   color: var(--color-gray, #9e9e9e);
   margin: 0;
-}
-
-.error-banner {
-  background-color: rgba(244, 67, 54, 0.1);
-  color: var(--color-error, #f44336);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid var(--color-error, #f44336);
-  font-size: 14px;
-}
-
-.success-banner {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: var(--color-success, #4caf50);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid var(--color-success, #4caf50);
-  font-size: 14px;
 }
 
 .auth-form {
