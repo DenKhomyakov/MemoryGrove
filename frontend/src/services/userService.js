@@ -19,7 +19,7 @@ class UserService {
   /**
    * Получение пользователя по email
    */
-  async getUserByEmail(email, token) {
+  async getUserByEmail(email) {
     try {
       const response = await apiClient.get(`/users/email/${email}`)
       console.log('✅ Пользователь получен:', response.data)
@@ -53,6 +53,22 @@ class UserService {
       return response.data
     } catch (error) {
       console.error('❌ Ошибка обновления:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
+   * Смена пароля пользователя
+   * @param {string} userId - UUID пользователя
+   * @param {Object} passwordData - объект с полями currentPassword, newPassword, confirmNewPassword
+   */
+  async changePassword(userId, passwordData) {
+    try {
+      const response = await apiClient.patch(`/users/${userId}/password`, passwordData)
+      console.log('✅ Пароль успешно изменён')
+      return response.data
+    } catch (error) {
+      console.error('❌ Ошибка смены пароля:', error.response?.data || error.message)
       throw error
     }
   }
