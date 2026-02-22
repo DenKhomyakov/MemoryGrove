@@ -22,6 +22,13 @@
         >
           Сменить пароль
         </button>
+        <button
+          class="tab-button"
+          :class="{ active: activeTab === 'deactivate' }"
+          @click="switchToDeactivateTab"
+        >
+          Деактивация
+        </button>
       </div>
 
       <!-- Загрузка -->
@@ -256,6 +263,49 @@
         </form>
       </div>
 
+      <!-- Вкладка деактивации -->
+      <div v-else-if="activeTab === 'deactivate'" class="tab-content">
+        <div class="deactivate-warning">
+          <div class="warning-icon">⚠️</div>
+          <h3>Внимание!</h3>
+          <p>После деактивации аккаунта вход в систему станет невозможен.</p>
+          <p class="note">Все ваши данные будут сохранены, а для повторной активации достаточно будет снова войти в аккаунт.</p>
+        </div>
+
+        <form @submit.prevent="handleDeactivate" class="profile-form">
+          <div class="form-row">
+            <TextArea
+              v-model="deactivateForm.reason"
+              label="Причина деактивации"
+              placeholder="Укажите причину деактивации аккаунта (необязательно)"
+              :error="errors.deactivateReason"
+              rows="3"
+            />
+          </div>
+
+          <div class="form-row">
+            <PasswordField
+              v-model="deactivateForm.password"
+              label="Подтверждение паролем"
+              placeholder="Введите ваш пароль для подтверждения"
+              required
+              :error="errors.deactivatePassword"
+            />
+          </div>
+
+          <div class="form-actions deactivate-actions">
+            <Button
+              type="submit"
+              variant="error"
+              :loading="deactivating"
+              block
+            >
+              Деактивировать аккаунт
+            </Button>
+          </div>
+        </form>
+      </div>
+
       <!-- Информация о статусе аккаунта -->
       <div class="account-status" v-if="userData">
         <div class="status-item">
@@ -265,6 +315,14 @@
         <div class="status-item">
           <span class="status-label">Последний вход:</span>
           <span class="status-value">{{ userData.lastLoginAt ? formatDateTime(userData.lastLoginAt) : 'Не выполнялся' }}</span>
+        </div>
+        <div class="status-item" v-if="!userData.active">
+          <span class="status-label">Дата деактивации:</span>
+          <span class="status-value">{{ formatDateTime(userData.deactivatedAt) || '—' }}</span>
+        </div>
+        <div class="status-item" v-if="!userData.active && userData.deactivationReason">
+          <span class="status-label">Причина деактивации:</span>
+          <span class="status-value">{{ userData.deactivationReason }}</span>
         </div>
         <div class="status-item">
           <span class="status-label">Статус аккаунта:</span>
@@ -305,6 +363,7 @@ const isEditing = ref(false)
 const loading = ref(true)
 const updatingProfile = ref(false)
 const updatingPassword = ref(false)
+const deactivating = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
@@ -320,7 +379,9 @@ const errors = reactive({
   description: '',
   currentPassword: '',
   newPassword: '',
-  confirmNewPassword: ''
+  confirmNewPassword: '',
+  deactivateReason: '',
+  deactivatePassword: ''
 })
 
 // Опции для выпадающих списков
@@ -348,6 +409,12 @@ const passwordForm = reactive({
   currentPassword: '',
   newPassword: '',
   confirmNewPassword: ''
+})
+
+// Форма деактивации
+const deactivateForm = reactive({
+  reason: '',
+  password: ''
 })
 
 // Показать уведомление
@@ -391,7 +458,7 @@ const getSexLabel = (sexId) => {
 // Переключение на вкладку профиля
 const switchToProfileTab = () => {
   activeTab.value = 'profile'
-  isEditing.value = false // Сбрасываем режим редактирования при переключении вкладки
+  isEditing.value = false
 }
 
 // Переключение на вкладку смены пароля
@@ -407,6 +474,17 @@ const switchToPasswordTab = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmNewPassword = ''
+}
+
+// Переключение на вкладку деактивации
+const switchToDeactivateTab = () => {
+  activeTab.value = 'deactivate'
+  isEditing.value = false
+  // Очищаем ошибки и форму деактивации
+  errors.deactivateReason = ''
+  errors.deactivatePassword = ''
+  deactivateForm.reason = ''
+  deactivateForm.password = ''
 }
 
 // Начало редактирования
@@ -428,7 +506,7 @@ const cancelEditing = () => {
   isEditing.value = false
   // Очищаем ошибки
   Object.keys(errors).forEach(key => {
-    if (!['currentPassword', 'newPassword', 'confirmNewPassword'].includes(key)) {
+    if (!['currentPassword', 'newPassword', 'confirmNewPassword', 'deactivateReason', 'deactivatePassword'].includes(key)) {
       errors[key] = ''
     }
   })
@@ -438,22 +516,14 @@ const cancelEditing = () => {
 const loadUserData = async () => {
   loading.value = true
   try {
-    // Получаем email из токена (можно также получить из localStorage)
-    // Вообще можно декодировать JWT токен и получить email или ID
-    // Но для простоты будем использовать email из localStorage или сохранять при входе
-
-    // Вариант 1: Если мы сохраняли email при входе
     const userEmail = localStorage.getItem('userEmail')
 
     if (!userEmail) {
-      // Если email не сохранён, пробуем получить из токена (упрощённо)
-      // ToDo: Лучше добавить эндпоинт /me на бэкенде
       showNotificationMessage('error', 'Не удалось определить пользователя')
       router.push('/login')
       return
     }
 
-    // Используем существующий эндпоинт для получения пользователя по email
     const response = await userService.getUserByEmail(userEmail)
     userData.value = response
 
@@ -484,16 +554,14 @@ const loadUserData = async () => {
 
 // Валидация формы профиля
 const validateProfileForm = () => {
-  // Очищаем ошибки профиля
   Object.keys(errors).forEach(key => {
-    if (!['currentPassword', 'newPassword', 'confirmNewPassword'].includes(key)) {
+    if (!['currentPassword', 'newPassword', 'confirmNewPassword', 'deactivateReason', 'deactivatePassword'].includes(key)) {
       errors[key] = ''
     }
   })
 
   let isValid = true
 
-  // Фамилия
   if (!profileForm.surname) {
     errors.surname = 'Введите фамилию'
     isValid = false
@@ -502,7 +570,6 @@ const validateProfileForm = () => {
     isValid = false
   }
 
-  // Имя
   if (!profileForm.name) {
     errors.name = 'Введите имя'
     isValid = false
@@ -511,13 +578,11 @@ const validateProfileForm = () => {
     isValid = false
   }
 
-  // Отчество (опционально)
   if (profileForm.middleName && profileForm.middleName.length < 2) {
     errors.middleName = 'Отчество должно содержать минимум 2 символа'
     isValid = false
   }
 
-  // Дата рождения
   if (!profileForm.birthDate) {
     errors.birthDate = 'Введите дату рождения'
     isValid = false
@@ -531,7 +596,6 @@ const validateProfileForm = () => {
     }
   }
 
-  // Пол
   if (!profileForm.sex) {
     errors.sex = 'Выберите пол'
     isValid = false
@@ -575,6 +639,20 @@ const validatePasswordForm = () => {
   return isValid
 }
 
+// Валидация формы деактивации
+const validateDeactivateForm = () => {
+  errors.deactivatePassword = ''
+
+  let isValid = true
+
+  if (!deactivateForm.password) {
+    errors.deactivatePassword = 'Введите пароль для подтверждения'
+    isValid = false
+  }
+
+  return isValid
+}
+
 // Обновление профиля
 const handleUpdateProfile = async () => {
   if (!validateProfileForm()) return
@@ -590,7 +668,7 @@ const handleUpdateProfile = async () => {
       sex: {
         id: profileForm.sex
       },
-      phone: profileForm.phone, // Телефон не меняется, но нужен для DTO
+      phone: profileForm.phone,
       address: profileForm.address || null,
       description: profileForm.description || null
     }
@@ -598,12 +676,8 @@ const handleUpdateProfile = async () => {
     const response = await userService.updateUser(userData.value.id, updateData)
     console.log('✅ Профиль обновлён:', response)
 
-    // Обновляем данные пользователя
     userData.value = response
-
     showNotificationMessage('success', 'Данные профиля успешно обновлены')
-
-    // Выходим из режима редактирования
     isEditing.value = false
 
   } catch (error) {
@@ -637,7 +711,6 @@ const handleChangePassword = async () => {
 
     showNotificationMessage('success', 'Пароль успешно изменён')
 
-    // Очищаем форму
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmNewPassword = ''
@@ -657,6 +730,49 @@ const handleChangePassword = async () => {
     }
   } finally {
     updatingPassword.value = false
+  }
+}
+
+// Деактивация аккаунта
+const handleDeactivate = async () => {
+  if (!validateDeactivateForm()) return
+
+  // Добавляем подтверждение
+  if (!confirm('Вы уверены, что хотите деактивировать аккаунт? Это действие можно отменить повторным входом в систему.')) {
+    return
+  }
+
+  deactivating.value = true
+
+  try {
+    // Сначала проверяем пароль через попытку входа
+    try {
+      await authService.login(userData.value.email, deactivateForm.password)
+    } catch (error) {
+      errors.deactivatePassword = 'Неверный пароль'
+      deactivating.value = false
+      return
+    }
+
+    // Если пароль верный, деактивируем аккаунт
+    await userService.deactivateUser(userData.value.id, deactivateForm.reason)
+    console.log('✅ Аккаунт деактивирован')
+
+    showNotificationMessage('success', 'Аккаунт успешно деактивирован')
+
+    // Выходим из системы
+    authService.logout()
+
+    // Перенаправляем на главную через 2 секунды
+    setTimeout(() => {
+      router.push('/')
+    }, 2000)
+
+  } catch (error) {
+    console.error('❌ Ошибка деактивации:', error)
+    showNotificationMessage('error', error.response?.data?.message || 'Ошибка деактивации аккаунта')
+  } finally {
+    deactivating.value = false
   }
 }
 
@@ -793,6 +909,42 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.deactivate-actions {
+  margin-top: 2rem;
+}
+
+/* Стили для предупреждения */
+.deactivate-warning {
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--color-error, #f44336);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.warning-icon {
+  font-size: 48px;
+  margin-bottom: 1rem;
+}
+
+.deactivate-warning h3 {
+  color: var(--color-error, #f44336);
+  font-size: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.deactivate-warning p {
+  color: var(--color-dark-gray, #616161);
+  margin-bottom: 0.5rem;
+}
+
+.deactivate-warning .note {
+  color: var(--color-gray, #9e9e9e);
+  font-size: 14px;
+  font-style: italic;
 }
 
 /* Стили для загрузки */

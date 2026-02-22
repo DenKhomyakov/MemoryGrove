@@ -35,7 +35,7 @@ defineProps({
   variant: {
     type: String,
     default: 'primary',
-    validator: (value) => ['primary', 'secondary', 'outline', 'text'].includes(value)
+    validator: (value) => ['primary', 'secondary', 'outline', 'text', 'error'].includes(value)
   },
   size: {
     type: String,
@@ -126,6 +126,17 @@ defineEmits(['click'])
 
 .btn.text:hover:not(:disabled) {
   background-color: rgba(136, 212, 36, 0.1);
+}
+
+.btn.error {
+  background-color: var(--color-error, #f44336);
+  color: var(--color-white, #ffffff);
+}
+
+.btn.error:hover:not(:disabled) {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
 /* Блок */
