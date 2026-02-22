@@ -9,6 +9,7 @@
 
         <nav class="main-nav">
           <router-link to="/" class="nav-link" active-class="active">Главная</router-link>
+          <router-link v-if="isAuthenticated" to="/profile" class="nav-link" active-class="active">Мой профиль</router-link>
           <router-link to="/about" class="nav-link" active-class="active">О проекте</router-link>
 
           <div v-if="isAuthenticated" class="user-menu">

@@ -16,6 +16,7 @@ class AuthService {
 
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('userEmail', identifier)
 
       console.log('✅ Вход выполнен успешно')
       window.dispatchEvent(new Event('auth-change'))
