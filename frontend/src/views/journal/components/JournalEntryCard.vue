@@ -13,10 +13,17 @@
       <div class="entry-date">
         <span class="date-icon">📅</span>
         <span>{{ entry.formattedCreatedAt }}</span>
-        <span v-if="entry.edited" class="edited-indicator" title="Было редактирование">📝</span>
       </div>
 
       <div class="entry-actions">
+        <span
+          v-if="entry.edited"
+          class="edited-indicator"
+          title="Запись была отредактирована"
+        >
+          📝
+        </span>
+
         <button
           class="icon-button view-btn"
           @click.stop="$emit('view', entry)"
@@ -132,16 +139,24 @@ const getPreview = (content) => {
   font-size: 14px;
 }
 
-.edited-indicator {
-  font-size: 14px;
-  opacity: 0.7;
-  margin-left: 4px;
-  cursor: help;
-}
-
 .entry-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.edited-indicator {
+  font-size: 16px;
+  opacity: 0.7;
+  cursor: help;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+}
+
+.edited-indicator:hover {
+  opacity: 1;
 }
 
 .icon-button {

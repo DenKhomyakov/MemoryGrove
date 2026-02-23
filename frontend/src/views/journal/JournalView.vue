@@ -228,7 +228,7 @@ const deleteEntry = async (entry) => {
 
   try {
     await journalService.deleteEntry(entry.id)
-    showNotificationMessage('success', 'Запись удалена')
+    showNotificationMessage('success', 'Запись успешно удалена')
     loadEntries()
     loadStats()
   } catch (error) {
