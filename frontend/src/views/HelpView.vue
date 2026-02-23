@@ -75,10 +75,11 @@
         </div>
       </section>
 
-      <!-- Полезные сайты и форумы -->
+      <!-- Полезные ресурсы -->
       <section class="help-section">
         <h2>🌐 Полезные ресурсы</h2>
         <div class="resources-grid">
+          <!-- Деменция.net -->
           <a href="https://деменция.net" target="_blank" rel="noopener noreferrer" class="resource-card">
             <div class="resource-icon">🧠</div>
             <h3>Деменция.net</h3>
@@ -91,11 +92,91 @@
             </div>
           </a>
 
-          <div class="resource-card support-forum">
-            <div class="resource-icon">💬</div>
-            <h3>Форум поддержки</h3>
-            <p class="resource-description">Скоро здесь появится форум, где вы сможете поделиться опытом и получить поддержку от людей, столкнувшихся с похожими проблемами.</p>
-            <div class="coming-soon">В разработке</div>
+          <!-- Минздрав РФ -->
+          <a href="https://minzdrav.gov.ru" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-icon">🏥</div>
+            <h3>Минздрав России</h3>
+            <p class="resource-description">Официальный портал Министерства здравоохранения РФ с информацией о медицинской помощи и реабилитации</p>
+            <div class="resource-features">
+              <span class="feature">📌 Адреса клиник</span>
+              <span class="feature">📞 Контакты</span>
+              <span class="feature">📋 Нормативные документы</span>
+            </div>
+          </a>
+
+          <!-- ВОЗ о деменции -->
+          <a href="https://www.who.int/ru/news-room/fact-sheets/detail/dementia" target="_blank" rel="noopener noreferrer" class="resource-card">
+            <div class="resource-icon">🌍</div>
+            <h3>ВОЗ: Деменция</h3>
+            <p class="resource-description">Всемирная организация здравоохранения - информация о деменции, статистика, рекомендации</p>
+            <div class="resource-features">
+              <span class="feature">📊 Статистика</span>
+              <span class="feature">📑 Научные данные</span>
+              <span class="feature">🌐 Международный опыт</span>
+            </div>
+          </a>
+
+          <!-- Мнемотехники -->
+          <div class="resource-card">
+            <div class="resource-icon">🧩</div>
+            <h3>Упражнения для памяти</h3>
+            <p class="resource-description">Простые и эффективные упражнения для тренировки памяти, которые можно выполнять самостоятельно</p>
+            <div class="memory-exercises">
+              <div class="exercise-item">
+                <span class="exercise-dot">•</span>
+                <span>Заучивание стихов</span>
+              </div>
+              <div class="exercise-item">
+                <span class="exercise-dot">•</span>
+                <span>Игры в слова</span>
+              </div>
+              <div class="exercise-item">
+                <span class="exercise-dot">•</span>
+                <span>Визуализация</span>
+              </div>
+              <div class="exercise-item">
+                <span class="exercise-dot">•</span>
+                <span>Ассоциативные ряды</span>
+              </div>
+              <div class="exercise-item">
+                <span class="exercise-dot">•</span>
+                <span>Кроссворды и судоку</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Памятка для близких -->
+      <section class="help-section">
+        <h2>👪 Памятка для близких</h2>
+        <div class="guide-card">
+          <p class="guide-intro">Если ваш близкий столкнулся с проблемами памяти, эти простые правила помогут в общении:</p>
+          <div class="guide-grid">
+            <div class="guide-item">
+              <span class="guide-number">1</span>
+              <p>Говорите медленно и чётко, используйте короткие фразы</p>
+            </div>
+            <div class="guide-item">
+              <span class="guide-number">2</span>
+              <p>Сохраняйте зрительный контакт и улыбайтесь</p>
+            </div>
+            <div class="guide-item">
+              <span class="guide-number">3</span>
+              <p>Не спорьте и не поправляйте, если человек что-то забыл</p>
+            </div>
+            <div class="guide-item">
+              <span class="guide-number">4</span>
+              <p>Используйте фотографии и знакомые предметы для разговора</p>
+            </div>
+            <div class="guide-item">
+              <span class="guide-number">5</span>
+              <p>Хвалите за каждое успешно выполненное действие</p>
+            </div>
+            <div class="guide-item">
+              <span class="guide-number">6</span>
+              <p>Сохраняйте привычный распорядок дня</p>
+            </div>
           </div>
         </div>
       </section>
@@ -373,7 +454,7 @@ const closeHelp = () => {
 /* Ресурсы */
 .resources-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
 
@@ -425,20 +506,73 @@ const closeHelp = () => {
   border-radius: 4px;
 }
 
-.support-forum {
-  position: relative;
-  opacity: 0.8;
+/* Упражнения для памяти */
+.memory-exercises {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.coming-soon {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 12px;
-  color: var(--color-gray, #9e9e9e);
-  background-color: var(--color-light-gray, #e0e0e0);
-  padding: 4px 8px;
-  border-radius: 4px;
+.exercise-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-dark-gray, #616161);
+  font-size: 14px;
+}
+
+.exercise-dot {
+  color: var(--color-primary, #88d424);
+  font-size: 18px;
+}
+
+/* Памятка для близких */
+.guide-card {
+  background: linear-gradient(135deg, rgba(136, 212, 36, 0.05) 0%, var(--color-white, #ffffff) 100%);
+  border: 1px solid var(--color-primary, #88d424);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.guide-intro {
+  color: var(--color-dark-gray, #616161);
+  font-size: 16px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.guide-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.5rem;
+}
+
+.guide-number {
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-primary, #88d424);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.guide-item p {
+  color: var(--color-dark-gray, #616161);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 /* Информационная сетка */
@@ -525,8 +659,13 @@ const closeHelp = () => {
   .phones-grid,
   .books-grid,
   .resources-grid,
-  .info-grid {
+  .info-grid,
+  .guide-grid {
     grid-template-columns: 1fr;
+  }
+
+  .guide-item {
+    justify-content: center;
   }
 
   .exit-button {

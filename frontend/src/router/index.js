@@ -24,8 +24,7 @@ const router = createRouter({
     {
       path: '/help',
       name: 'help',
-      component: HelpView,
-      meta: { requiresAuth: true }
+      component: HelpView
     },
     {
       path: '/about',

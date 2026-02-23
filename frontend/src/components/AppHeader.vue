@@ -11,6 +11,7 @@
           <router-link to="/" class="nav-link" active-class="active">Главная</router-link>
           <router-link v-if="isAuthenticated" to="/profile" class="nav-link" active-class="active">Мой профиль</router-link>
           <router-link to="/about" class="nav-link" active-class="active">О проекте</router-link>
+          <router-link to="/help" class="nav-link" active-class="active">🫂 Помощь</router-link>
 
           <div v-if="isAuthenticated" class="user-menu">
             <button @click="logout" class="nav-link logout-btn">
