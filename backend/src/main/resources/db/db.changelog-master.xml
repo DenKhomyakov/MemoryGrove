@@ -10,6 +10,10 @@
     <include file="db/changelog/20260118203800_create_sex.xml"/>
     <include file="db/changelog/20260118204400_create_role.xml"/>
     <include file="db/changelog/20260118202400_create_user.xml"/>
+
     <include file="db/changelog/20260223135700_create_journal_entries.xml"/>
+
+    <include file="db/changelog/20260223210000_create_reminder_statuses.xml"/>
+    <include file="db/changelog/20260223210200_create_reminders.xml"/>
 
 </databaseChangeLog>

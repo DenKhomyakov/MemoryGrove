@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260223210000" author="KhomyakovDA">
+
+        <createTable tableName="reminder_statuses" remarks="Справочник статусов напоминаний">
+
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(50)" remarks="Наименование статуса">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- PENDING - Ожидает отправки -->
+        <insert tableName="reminder_statuses">
+            <column name="id" value="6cc6ee82-b293-453b-a5df-94428f5f84ed"/>
+            <column name="name" value="PENDING"/>
+        </insert>
+
+        <!-- SENT - Отправлено -->
+        <insert tableName="reminder_statuses">
+            <column name="id" value="5f699cae-62e2-431b-a460-e9d594938424"/>
+            <column name="name" value="SENT"/>
+        </insert>
+
+        <!-- COMPLETED - Выполнено пользователем -->
+        <insert tableName="reminder_statuses">
+            <column name="id" value="7665777b-e1e9-4be7-a8c5-fb2e7d457b20"/>
+            <column name="name" value="COMPLETED"/>
+        </insert>
+
+        <!-- CANCELLED - Отменено -->
+        <insert tableName="reminder_statuses">
+            <column name="id" value="e6ebcf79-82ac-4d92-bb35-0ec71a3845cd"/>
+            <column name="name" value="CANCELLED"/>
+        </insert>
+
+        <createIndex tableName="reminder_statuses" indexName="idx_reminder_statuses_name">
+            <column name="name"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="reminder_statuses"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
