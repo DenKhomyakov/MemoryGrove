@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260223135700" author="KhomyakovDA">
+
+        <createTable tableName="journal_entries" remarks="Записи личного дневника пользователя">
+
+            <column name="id" type="UUID" remarks="ID записи">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя (владелец записи)">
+                <constraints nullable="false" foreignKeyName="fk_journal_entries_user"
+                             referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+
+            <column name="title" type="VARCHAR(200)" remarks="Заголовок записи">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content" type="TEXT" remarks="Содержание записи">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="mood" type="VARCHAR(50)" remarks="Настроение (опционально)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"
+                    remarks="Дата и время создания записи">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата и время последнего редактирования">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="journal_entries" indexName="idx_journal_entries_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="journal_entries" indexName="idx_journal_entries_created_at">
+            <column name="created_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="journal_entries"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

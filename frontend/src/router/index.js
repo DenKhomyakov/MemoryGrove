@@ -5,6 +5,8 @@ import RegisterView from '../views/RegisterView.vue'
 import AboutView from '../views/AboutView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import HelpView from '../views/HelpView.vue'
+import JournalView from '../views/journal/JournalView.vue'
+import JournalEntryView from '../views/journal/JournalEntryView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +21,18 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/journal',
+      name: 'journal',
+      component: JournalView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/journal/:id',
+      name: 'journal-entry',
+      component: JournalEntryView,
       meta: { requiresAuth: true }
     },
     {

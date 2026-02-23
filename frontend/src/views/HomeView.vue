@@ -9,12 +9,12 @@
     <section class="modules-section">
       <h2>Основные модули</h2>
       <div class="modules-grid">
-        <div class="module-card">
+        <router-link to="/journal" class="module-card">
           <div class="module-icon">🌳</div>
           <h3>Безопасный лес</h3>
-          <p>Личный дневник, система напоминаний, простые данные о пациенте</p>
-          <div class="module-status">Скоро</div>
-        </div>
+          <p>Личный дневник, система напоминаний, данные о пациенте</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
 
         <div class="module-card">
           <div class="module-icon">🤝</div>
@@ -30,7 +30,6 @@
           <div class="module-status">Скоро</div>
         </div>
 
-        <!-- Блок психологической помощи (уже доступен) -->
         <router-link to="/help" class="module-card help-card">
           <div class="module-icon">🫂</div>
           <h3>Психологическая помощь</h3>
