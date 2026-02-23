@@ -10,7 +10,7 @@
           <Button
             variant="outline"
             size="small"
-            @click="handleEdit"
+            @click="showEditForm = true"
           >
             ✏️ Редактировать
           </Button>
@@ -32,7 +32,7 @@
             <span class="meta-value">{{ entry.formattedCreatedAt }}</span>
           </div>
           <div v-if="entry.edited" class="meta-item">
-            <span class="meta-label">✏️ Изменено:</span>
+            <span class="meta-label">📝 Изменено:</span>
             <span class="meta-value">{{ entry.formattedUpdatedAt }}</span>
           </div>
           <div v-if="entry.mood" class="meta-item mood">
@@ -55,6 +55,20 @@
       </div>
     </div>
 
+    <!-- Модальное окно редактирования -->
+    <Teleport to="body">
+      <div v-if="showEditForm" class="modal-overlay" @click.self="showEditForm = false">
+        <div class="modal-content">
+          <JournalEntryForm
+            :entry="entry"
+            :isEditing="true"
+            @submit="updateEntry"
+            @close="showEditForm = false"
+          />
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Уведомления -->
     <Notification
       v-if="showNotification"
@@ -71,12 +85,14 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
+import JournalEntryForm from './JournalEntryForm.vue'
 import journalService from '@/services/journalService'
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const entry = ref(null)
+const showEditForm = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('info')
@@ -107,6 +123,19 @@ const loadEntry = async () => {
   }
 }
 
+// Обновление записи
+const updateEntry = async (entryData) => {
+  try {
+    const updated = await journalService.updateEntry(entry.value.id, entryData)
+    entry.value = updated
+    showEditForm.value = false
+    showNotificationMessage('success', 'Запись успешно обновлена')
+  } catch (error) {
+    console.error('❌ Ошибка обновления:', error)
+    showNotificationMessage('error', 'Ошибка при обновлении записи')
+  }
+}
+
 // Показать ошибку
 const showError = (message) => {
   notificationType.value = 'error'
@@ -117,14 +146,16 @@ const showError = (message) => {
   }, 2000)
 }
 
+// Показать уведомление
+const showNotificationMessage = (type, message) => {
+  notificationType.value = type
+  notificationMessage.value = message
+  showNotification.value = true
+}
+
 // Переход назад
 const goBack = () => {
   router.push('/journal')
-}
-
-// Редактирование
-const handleEdit = () => {
-  router.push(`/journal/${entry.value.id}/edit`)
 }
 
 // Удаление
@@ -276,6 +307,41 @@ onMounted(() => {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 

@@ -272,6 +272,7 @@ public class JournalService {
     @Data
     @AllArgsConstructor
     public static class JournalStats {
+
         /**
          * Общее количество записей
          */

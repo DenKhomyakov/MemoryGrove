@@ -13,7 +13,7 @@
       <div class="entry-date">
         <span class="date-icon">📅</span>
         <span>{{ entry.formattedCreatedAt }}</span>
-        <span v-if="entry.edited" class="edited-badge" title="Было редактирование">✏️</span>
+        <span v-if="entry.edited" class="edited-indicator" title="Было редактирование">📝</span>
       </div>
 
       <div class="entry-actions">
@@ -123,7 +123,7 @@ const getPreview = (content) => {
 .entry-date {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   color: var(--color-gray, #9e9e9e);
   font-size: 12px;
 }
@@ -132,9 +132,11 @@ const getPreview = (content) => {
   font-size: 14px;
 }
 
-.edited-badge {
-  margin-left: 4px;
+.edited-indicator {
+  font-size: 14px;
   opacity: 0.7;
+  margin-left: 4px;
+  cursor: help;
 }
 
 .entry-actions {
@@ -159,15 +161,18 @@ const getPreview = (content) => {
 }
 
 .view-btn:hover {
-  background-color: rgba(136, 212, 36, 0.1);
+  background-color: rgba(136, 212, 36, 0.2);
+  color: var(--color-primary-dark, #6aa91c);
 }
 
 .edit-btn:hover {
-  background-color: rgba(255, 152, 0, 0.1);
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #1976d2;
 }
 
 .delete-btn:hover {
-  background-color: rgba(244, 67, 54, 0.1);
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--color-error, #f44336);
 }
 
 @media (max-width: 768px) {
