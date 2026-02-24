@@ -7,6 +7,7 @@ import ProfileView from '../views/ProfileView.vue'
 import HelpView from '../views/HelpView.vue'
 import JournalView from '../views/journal/JournalView.vue'
 import JournalEntryView from '../views/journal/JournalEntryView.vue'
+import RemindersView from '../views/reminders/RemindersView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,12 @@ const router = createRouter({
       path: '/journal/:id',
       name: 'journal-entry',
       component: JournalEntryView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/reminders',
+      name: 'reminders',
+      component: RemindersView,
       meta: { requiresAuth: true }
     },
     {
