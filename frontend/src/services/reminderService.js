@@ -161,4 +161,4 @@ class ReminderService {
   }
 }
 
-export default ReminderService
+export default new ReminderService()
