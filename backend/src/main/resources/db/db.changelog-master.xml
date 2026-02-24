@@ -16,4 +16,6 @@
     <include file="db/changelog/20260223210000_create_reminder_statuses.xml"/>
     <include file="db/changelog/20260223210200_create_reminders.xml"/>
 
+    <include file="db/changelog/20260224204000_create_telegram_bindings.xml"/>
+
 </databaseChangeLog>

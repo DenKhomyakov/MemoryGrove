@@ -9,6 +9,7 @@ import com.memorygrove.backend.entity.dto.reminder.response.ReminderResponseDto;
 import com.memorygrove.backend.repository.ReminderRepository;
 import com.memorygrove.backend.repository.ReminderStatusRepository;
 import com.memorygrove.backend.repository.UserRepository;
+import com.memorygrove.backend.telegram.service.TelegramService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -48,6 +49,7 @@ public class ReminderService {
 
     private final ReminderRepository reminderRepository;
     private final ReminderStatusRepository reminderStatusRepository;
+    private final TelegramService telegramService;
     private final UserRepository userRepository;
 
     /**
@@ -248,6 +250,19 @@ public class ReminderService {
                 // Здесь будет отправка уведомления (Telegram/email)
                 log.info("🔔 Отправка напоминания {} для пользователя {}",
                         reminder.getId(), reminder.getUser().getId());
+
+                boolean sent = telegramService.sendReminderNotification(
+                        reminder.getUser().getId(),
+                        reminder.getTitle(),
+                        reminder.getDescription()
+                );
+
+                if (sent) {
+                    log.debug("✅ Уведомление отправлено в Telegram для пользователя {}",
+                            reminder.getUser().getId());
+                } else {
+                    log.debug("⚠️ Уведомление не отправлено в Telegram (пользователь не привязан или отключил уведомления)");
+                }
 
                 // После отправки меняем статус на SENT
                 reminder.setStatus(sentStatus);
