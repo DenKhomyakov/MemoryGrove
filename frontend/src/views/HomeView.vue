@@ -19,7 +19,7 @@
         <router-link to="/reminders" class="module-card">
           <div class="module-icon">⏰</div>
           <h3>Напоминания</h3>
-          <p>Не забывайте о важных делах</p>
+          <p>Добрые напоминания о важных делах</p>
           <div class="module-status available">Доступно</div>
         </router-link>
 

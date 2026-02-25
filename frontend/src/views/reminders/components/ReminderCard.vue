@@ -20,9 +20,13 @@
     <div class="card-footer">
       <div class="reminder-meta">
         <span class="meta-item">Создано: {{ reminder.formattedCreatedAt || formatDate(reminder.createdAt) }}</span>
+        <span v-if="reminder.formattedUpdatedAt" class="meta-item edited">
+          • Изменено: {{ reminder.formattedUpdatedAt }}
+        </span>
       </div>
 
       <div class="card-actions">
+        <!-- Кнопка "Выполнено" (только для PENDING) -->
         <button
           v-if="reminder.status?.id === statuses.PENDING"
           class="icon-button complete-btn"
@@ -31,13 +35,28 @@
         >
           ✅
         </button>
+
+        <!-- Кнопка "Отмена" (только для PENDING) -->
         <button
+          v-if="reminder.status?.id === statuses.PENDING"
+          class="icon-button cancel-btn"
+          @click.stop="$emit('cancel', reminder)"
+          title="Отменить напоминание"
+        >
+          ❌
+        </button>
+
+        <!-- Кнопка "Редактировать" (для всех, кроме COMPLETED и CANCELLED?) -->
+        <button
+          v-if="reminder.status?.id !== statuses.COMPLETED && reminder.status?.id !== statuses.CANCELLED"
           class="icon-button edit-btn"
           @click.stop="$emit('edit', reminder)"
           title="Редактировать"
         >
           ✏️
         </button>
+
+        <!-- Кнопка "Удалить" (для всех) -->
         <button
           class="icon-button delete-btn"
           @click.stop="$emit('delete', reminder)"
@@ -60,7 +79,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['complete', 'edit', 'delete'])
+defineEmits(['complete', 'cancel', 'edit', 'delete'])
 
 // Получаем статусы из сервиса
 const statuses = reminderService.constructor.Status || {
@@ -201,11 +220,20 @@ const formatDate = (dateString) => {
   margin-top: auto;
   padding-top: 0.5rem;
   border-top: 1px solid var(--color-light-gray, #e0e0e0);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .reminder-meta {
   color: var(--color-gray, #9e9e9e);
   font-size: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-item.edited {
+  color: var(--color-primary, #88d424);
 }
 
 .card-actions {
@@ -233,6 +261,10 @@ const formatDate = (dateString) => {
   background-color: rgba(76, 175, 80, 0.2);
 }
 
+.cancel-btn:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
 .edit-btn:hover {
   background-color: rgba(33, 150, 243, 0.2);
 }
@@ -252,7 +284,6 @@ const formatDate = (dateString) => {
 
   .card-footer {
     flex-direction: column;
-    gap: 1rem;
     align-items: flex-start;
   }
 

@@ -58,8 +58,9 @@
           :key="reminder.id"
           :reminder="reminder"
           @complete="markAsCompleted"
-          @edit="editReminder"
-          @delete="deleteReminder"
+          @cancel="markAsCancelled"
+        @edit="editReminder"
+        @delete="deleteReminder"
         />
       </div>
     </div>
@@ -95,7 +96,7 @@ import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
 import ReminderCard from './components/ReminderCard.vue'
 import ReminderForm from './ReminderForm.vue'
-import reminderService from '@/services/reminderService'  // ИМПОРТ ПО УМОЛЧАНИЮ (БЕЗ ФИГУРНЫХ СКОБОК!)
+import reminderService from '@/services/reminderService'
 
 const loading = ref(true)
 const allReminders = ref([])
@@ -106,32 +107,21 @@ const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
 
-// Используем импортированный reminderService
-const Status = reminderService.constructor.Status  // Получаем статические поля через constructor
+// Получаем статусы из сервиса
+const statuses = reminderService.constructor.Status || {
+  PENDING: '6cc6ee82-b293-453b-a5df-94428f5f84ed',
+  SENT: '5f699cae-62e2-431b-a460-e9d594938424',
+  COMPLETED: '7665777b-e1e9-4be7-a8c5-fb2e7d457b20',
+  CANCELLED: 'e6ebcf79-82ac-4d92-bb35-0ec71a3845cd'
+}
 
 // Фильтры для статусов
 const statusFilters = [
   { id: 'all', label: 'Все', color: 'var(--color-gray)' },
-  {
-    id: Status?.PENDING || '6cc6ee82-b293-453b-a5df-94428f5f84ed',
-    label: 'Ожидают',
-    color: 'var(--color-warning)'
-  },
-  {
-    id: Status?.SENT || '5f699cae-62e2-431b-a460-e9d594938424',
-    label: 'Отправлены',
-    color: 'var(--color-primary)'
-  },
-  {
-    id: Status?.COMPLETED || '7665777b-e1e9-4be7-a8c5-fb2e7d457b20',
-    label: 'Выполнены',
-    color: 'var(--color-success)'
-  },
-  {
-    id: Status?.CANCELLED || 'e6ebcf79-82ac-4d92-bb35-0ec71a3845cd',
-    label: 'Отменены',
-    color: 'var(--color-gray)'
-  }
+  { id: statuses.PENDING, label: 'Ожидают', color: 'var(--color-warning)' },
+  { id: statuses.SENT, label: 'Отправлены', color: 'var(--color-primary)' },
+  { id: statuses.COMPLETED, label: 'Выполнены', color: 'var(--color-success)' },
+  { id: statuses.CANCELLED, label: 'Отменены', color: 'var(--color-gray)' }
 ]
 
 // Отфильтрованные напоминания
@@ -193,7 +183,7 @@ const editReminder = (reminder) => {
 // Отметка как выполненное
 const markAsCompleted = async (reminder) => {
   try {
-    await reminderService.updateReminderStatus(reminder.id, Status?.COMPLETED || '7665777b-e1e9-4be7-a8c5-fb2e7d457b20')
+    await reminderService.updateReminderStatus(reminder.id, statuses.COMPLETED)
     showNotificationMessage('success', 'Напоминание отмечено как выполненное')
     await loadReminders()
   } catch (error) {
@@ -202,24 +192,46 @@ const markAsCompleted = async (reminder) => {
   }
 }
 
+// Отметка как отменённое
+const markAsCancelled = async (reminder) => {
+  if (!confirm(`Отменить напоминание "${reminder.title}"?`)) {
+    return
+  }
+
+  try {
+    await reminderService.updateReminderStatus(reminder.id, statuses.CANCELLED)
+    showNotificationMessage('success', 'Напоминание отменено')
+    await loadReminders()
+  } catch (error) {
+    console.error('❌ Ошибка:', error)
+    showNotificationMessage('error', 'Ошибка при отмене напоминания')
+  }
+}
+
 // Сохранение напоминания (создание или обновление)
 const saveReminder = async (reminderData) => {
   try {
+    let response
+
     if (editingReminder.value) {
       // Обновление
-      await reminderService.updateReminder(editingReminder.value.id, {
+      response = await reminderService.updateReminder(editingReminder.value.id, {
         ...reminderData,
         statusId: editingReminder.value.status.id
       })
       showNotificationMessage('success', 'Напоминание обновлено')
     } else {
       // Создание
-      await reminderService.createReminder(reminderData)
+      response = await reminderService.createReminder(reminderData)
       showNotificationMessage('success', 'Напоминание создано')
     }
 
     closeForm()
     await loadReminders()
+
+    // Логируем ответ для отладки (можно удалить потом)
+    console.log('Ответ от сервера:', response)
+
   } catch (error) {
     console.error('❌ Ошибка сохранения:', error)
     showNotificationMessage('error', 'Ошибка при сохранении')
@@ -260,6 +272,7 @@ onMounted(() => {
 })
 </script>
 
+<!-- Стили без изменений, оставляю как есть -->
 <style scoped>
 .reminders-page {
   width: 100%;
@@ -298,7 +311,7 @@ onMounted(() => {
   padding: 1rem;
   background-color: var(--color-white, #ffffff);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.05));
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.05));
 }
 
 .filter-button {
