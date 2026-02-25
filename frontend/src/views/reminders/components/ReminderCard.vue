@@ -26,9 +26,9 @@
       </div>
 
       <div class="card-actions">
-        <!-- Кнопка "Выполнено" (только для PENDING) -->
+        <!-- Кнопка "Выполнено" (не показываем, если уже выполнено) -->
         <button
-          v-if="reminder.status?.id === statuses.PENDING"
+          v-if="reminder.status?.id !== statuses.COMPLETED"
           class="icon-button complete-btn"
           @click.stop="$emit('complete', reminder)"
           title="Отметить выполненным"
@@ -36,9 +36,9 @@
           ✅
         </button>
 
-        <!-- Кнопка "Отмена" (только для PENDING) -->
+        <!-- Кнопка "Отмена" (не показываем, если уже отменено) -->
         <button
-          v-if="reminder.status?.id === statuses.PENDING"
+          v-if="reminder.status?.id !== statuses.CANCELLED"
           class="icon-button cancel-btn"
           @click.stop="$emit('cancel', reminder)"
           title="Отменить напоминание"
@@ -46,9 +46,8 @@
           ❌
         </button>
 
-        <!-- Кнопка "Редактировать" (для всех, кроме COMPLETED и CANCELLED?) -->
+        <!-- Кнопка "Редактировать" (для всех) -->
         <button
-          v-if="reminder.status?.id !== statuses.COMPLETED && reminder.status?.id !== statuses.CANCELLED"
           class="icon-button edit-btn"
           @click.stop="$emit('edit', reminder)"
           title="Редактировать"
