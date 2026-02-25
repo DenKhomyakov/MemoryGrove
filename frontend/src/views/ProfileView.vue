@@ -24,6 +24,13 @@
         </button>
         <button
           class="tab-button"
+          :class="{ active: activeTab === 'telegram' }"
+          @click="switchToTelegramTab"
+        >
+          Telegram
+        </button>
+        <button
+          class="tab-button"
           :class="{ active: activeTab === 'deactivate' }"
           @click="switchToDeactivateTab"
         >
@@ -263,6 +270,10 @@
         </form>
       </div>
 
+      <div v-else-if="activeTab === 'telegram'" class="tab-content">
+        <TelegramBinding />
+      </div>
+
       <!-- Вкладка деактивации -->
       <div v-else-if="activeTab === 'deactivate'" class="tab-content">
         <div class="deactivate-warning">
@@ -354,6 +365,7 @@ import Select from '@/components/UI/Select.vue'
 import PasswordField from '@/components/UI/PasswordField.vue'
 import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
+import TelegramBinding from '@/components/TelegramBinding.vue'
 import userService from '@/services/userService'
 import authService from '@/services/authService'
 
@@ -474,6 +486,12 @@ const switchToPasswordTab = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmNewPassword = ''
+}
+
+// Переключение на вкладку Telegram
+const switchToTelegramTab = () => {
+  activeTab.value = 'telegram'
+  isEditing.value = false
 }
 
 // Переключение на вкладку деактивации
@@ -822,6 +840,7 @@ onMounted(() => {
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--color-light-gray, #e0e0e0);
   padding-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .tab-button {

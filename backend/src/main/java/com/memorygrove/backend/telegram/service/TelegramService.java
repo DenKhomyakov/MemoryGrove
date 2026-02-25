@@ -7,13 +7,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.UUID;
 
 /**
  * Сервис для отправки уведомлений через Telegram
+ * <p>
+ * Предоставляет методы для отправки различных типов уведомлений
+ * пользователям, привязавшим Telegram аккаунт.
+ * </p>
  */
 @Log4j2
 @Service
@@ -28,8 +30,8 @@ public class TelegramService {
      *
      * @param userId ID пользователя в системе
      * @param title заголовок напоминания
-     * @param description описание напоминания
-     * @return true если сообщение отправлено успешно
+     * @param description описание напоминания (может быть null)
+     * @return true если сообщение отправлено успешно, false если пользователь не привязал Telegram
      */
     @Transactional(readOnly = true)
     public boolean sendReminderNotification(UUID userId, String title, String description) {
@@ -49,32 +51,31 @@ public class TelegramService {
                 description != null ? description : ""
         );
 
-        return sendMessage(binding.getChatId(), message);
+        memoryGroveBot.sendMessage(binding.getChatId(), message);
+        return true;
     }
 
     /**
-     * Отправляет простое сообщение в указанный чат
+     * Отправляет приветственное сообщение после привязки
      *
-     * @param chatId ID чата Telegram
-     * @param text текст сообщения
-     * @return true если отправлено успешно
+     * @param userId ID пользователя в системе
+     * @return true если сообщение отправлено успешно
      */
-    public boolean sendMessage(Long chatId, String text) {
-        try {
-            SendMessage message = SendMessage.builder()
-                    .chatId(chatId.toString())
-                    .text(text)
-                    .parseMode("Markdown")
-                    .build();
+    @Transactional(readOnly = true)
+    public boolean sendWelcomeMessage(UUID userId) {
+        TelegramBinding binding = bindingRepository.findByUserId(userId)
+                .orElse(null);
 
-            memoryGroveBot.execute(message);
-            log.debug("✅ Сообщение отправлено в чат {}", chatId);
-            return true;
-
-        } catch (TelegramApiException e) {
-            log.error("❌ Ошибка отправки сообщения в чат {}: {}", chatId, e.getMessage());
+        if (binding == null || binding.getChatId() == null) {
             return false;
         }
+
+        String message = "🎉 *Добро пожаловать в семью MemoryGrove!*\n\n" +
+                "Теперь вы будете получать уведомления о напоминаниях. " +
+                "Если захотите отключить уведомления, это можно сделать в профиле на сайте.";
+
+        memoryGroveBot.sendMessage(binding.getChatId(), message);
+        return true;
     }
 
     /**
