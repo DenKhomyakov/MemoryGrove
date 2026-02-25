@@ -24,7 +24,7 @@ class ReminderService {
   async getAllReminders() {
     try {
       const response = await apiClient.get('/reminders/all')
-      console.log('✅ Все напоминания получены:', response.data)
+      console.log('✅ Все напоминания получены, количество:', response.data?.length || 0)
       return response.data
     } catch (error) {
       console.error('❌ Ошибка получения всех напоминаний:', error.response?.data || error.message)

@@ -2,8 +2,8 @@
   <div class="reminder-card" :class="{ 'overdue': reminder.overdue }">
     <div class="card-header">
       <h3 class="reminder-title">{{ reminder.title }}</h3>
-      <div class="status-badge" :style="{ backgroundColor: getStatusColor(reminder.status.id) }">
-        {{ getStatusText(reminder.status.id) }}
+      <div class="status-badge" :style="{ backgroundColor: getStatusColor(reminder.status?.id) }">
+        {{ getStatusText(reminder.status?.id) }}
       </div>
     </div>
 
@@ -13,18 +13,18 @@
 
     <div class="reminder-time">
       <span class="time-icon">⏰</span>
-      <span class="time-text">{{ reminder.formattedRemindAt }}</span>
+      <span class="time-text">{{ reminder.formattedRemindAt || reminder.remindAt }}</span>
       <span v-if="reminder.overdue" class="overdue-badge">Просрочено!</span>
     </div>
 
     <div class="card-footer">
       <div class="reminder-meta">
-        <span class="meta-item">Создано: {{ reminder.formattedCreatedAt }}</span>
+        <span class="meta-item">Создано: {{ reminder.formattedCreatedAt || formatDate(reminder.createdAt) }}</span>
       </div>
 
       <div class="card-actions">
         <button
-          v-if="reminder.status.id === ReminderService.Status.PENDING"
+          v-if="reminder.status?.id === statuses.PENDING"
           class="icon-button complete-btn"
           @click.stop="$emit('complete', reminder)"
           title="Отметить выполненным"
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import ReminderService from '@/services/reminderService'
+import reminderService from '@/services/reminderService'
 
 const props = defineProps({
   reminder: {
@@ -62,12 +62,57 @@ const props = defineProps({
 
 defineEmits(['complete', 'edit', 'delete'])
 
-const getStatusText = (statusId) => {
-  return ReminderService.getStatusText(statusId)
+// Получаем статусы из сервиса
+const statuses = reminderService.constructor.Status || {
+  PENDING: '6cc6ee82-b293-453b-a5df-94428f5f84ed',
+  SENT: '5f699cae-62e2-431b-a460-e9d594938424',
+  COMPLETED: '7665777b-e1e9-4be7-a8c5-fb2e7d457b20',
+  CANCELLED: 'e6ebcf79-82ac-4d92-bb35-0ec71a3845cd'
 }
 
+// Функция для получения текста статуса
+const getStatusText = (statusId) => {
+  if (!statusId) return 'Неизвестно'
+
+  const statusMap = {
+    [statuses.PENDING]: 'Ожидает',
+    [statuses.SENT]: 'Отправлено',
+    [statuses.COMPLETED]: 'Выполнено',
+    [statuses.CANCELLED]: 'Отменено'
+  }
+
+  return statusMap[statusId] || 'Неизвестно'
+}
+
+// Функция для получения цвета статуса
 const getStatusColor = (statusId) => {
-  return ReminderService.getStatusColor(statusId)
+  if (!statusId) return 'var(--color-gray, #9e9e9e)'
+
+  const colorMap = {
+    [statuses.PENDING]: 'var(--color-warning, #ff9800)',
+    [statuses.SENT]: 'var(--color-primary, #88d424)',
+    [statuses.COMPLETED]: 'var(--color-success, #4caf50)',
+    [statuses.CANCELLED]: 'var(--color-gray, #9e9e9e)'
+  }
+
+  return colorMap[statusId] || 'var(--color-gray, #9e9e9e)'
+}
+
+// Форматирование даты на случай, если formattedCreatedAt отсутствует
+const formatDate = (dateString) => {
+  if (!dateString) return 'Неизвестно'
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)
+  } catch (e) {
+    return dateString
+  }
 }
 </script>
 

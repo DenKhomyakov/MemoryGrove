@@ -90,12 +90,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
 import ReminderCard from './components/ReminderCard.vue'
 import ReminderForm from './ReminderForm.vue'
-import ReminderService from '@/services/reminderService'
+import reminderService from '@/services/reminderService'  // ИМПОРТ ПО УМОЛЧАНИЮ (БЕЗ ФИГУРНЫХ СКОБОК!)
 
 const loading = ref(true)
 const allReminders = ref([])
@@ -106,32 +106,68 @@ const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
 
+// Используем импортированный reminderService
+const Status = reminderService.constructor.Status  // Получаем статические поля через constructor
+
 // Фильтры для статусов
 const statusFilters = [
   { id: 'all', label: 'Все', color: 'var(--color-gray)' },
-  { id: ReminderService.Status.PENDING, label: 'Ожидают', color: 'var(--color-warning)' },
-  { id: ReminderService.Status.SENT, label: 'Отправлены', color: 'var(--color-primary)' },
-  { id: ReminderService.Status.COMPLETED, label: 'Выполнены', color: 'var(--color-success)' },
-  { id: ReminderService.Status.CANCELLED, label: 'Отменены', color: 'var(--color-gray)' }
+  {
+    id: Status?.PENDING || '6cc6ee82-b293-453b-a5df-94428f5f84ed',
+    label: 'Ожидают',
+    color: 'var(--color-warning)'
+  },
+  {
+    id: Status?.SENT || '5f699cae-62e2-431b-a460-e9d594938424',
+    label: 'Отправлены',
+    color: 'var(--color-primary)'
+  },
+  {
+    id: Status?.COMPLETED || '7665777b-e1e9-4be7-a8c5-fb2e7d457b20',
+    label: 'Выполнены',
+    color: 'var(--color-success)'
+  },
+  {
+    id: Status?.CANCELLED || 'e6ebcf79-82ac-4d92-bb35-0ec71a3845cd',
+    label: 'Отменены',
+    color: 'var(--color-gray)'
+  }
 ]
 
 // Отфильтрованные напоминания
 const filteredReminders = computed(() => {
+  if (!allReminders.value || allReminders.value.length === 0) {
+    return []
+  }
+
   if (currentFilter.value === 'all') {
     return allReminders.value
   }
-  return allReminders.value.filter(r => r.status.id === currentFilter.value)
+
+  return allReminders.value.filter(r => r.status && r.status.id === currentFilter.value)
 })
 
 // Загрузка напоминаний
 const loadReminders = async () => {
   loading.value = true
   try {
-    const response = await ReminderService.getAllReminders()
-    allReminders.value = response
+    const reminders = await reminderService.getAllReminders()
+    console.log('📥 Получены напоминания:', reminders)
+
+    if (Array.isArray(reminders)) {
+      allReminders.value = reminders
+    } else if (reminders && reminders.content) {
+      allReminders.value = reminders.content
+    } else {
+      console.warn('⚠️ Неожиданный формат данных:', reminders)
+      allReminders.value = []
+    }
+
+    console.log('✅ Загружено напоминаний:', allReminders.value.length)
   } catch (error) {
     console.error('❌ Ошибка загрузки напоминаний:', error)
     showNotificationMessage('error', 'Ошибка загрузки напоминаний')
+    allReminders.value = []
   } finally {
     loading.value = false
   }
@@ -157,9 +193,9 @@ const editReminder = (reminder) => {
 // Отметка как выполненное
 const markAsCompleted = async (reminder) => {
   try {
-    await ReminderService.updateReminderStatus(reminder.id, ReminderService.Status.COMPLETED)
+    await reminderService.updateReminderStatus(reminder.id, Status?.COMPLETED || '7665777b-e1e9-4be7-a8c5-fb2e7d457b20')
     showNotificationMessage('success', 'Напоминание отмечено как выполненное')
-    loadReminders()
+    await loadReminders()
   } catch (error) {
     console.error('❌ Ошибка:', error)
     showNotificationMessage('error', 'Ошибка при обновлении статуса')
@@ -171,19 +207,19 @@ const saveReminder = async (reminderData) => {
   try {
     if (editingReminder.value) {
       // Обновление
-      await ReminderService.updateReminder(editingReminder.value.id, {
+      await reminderService.updateReminder(editingReminder.value.id, {
         ...reminderData,
         statusId: editingReminder.value.status.id
       })
       showNotificationMessage('success', 'Напоминание обновлено')
     } else {
       // Создание
-      await ReminderService.createReminder(reminderData)
+      await reminderService.createReminder(reminderData)
       showNotificationMessage('success', 'Напоминание создано')
     }
 
     closeForm()
-    loadReminders()
+    await loadReminders()
   } catch (error) {
     console.error('❌ Ошибка сохранения:', error)
     showNotificationMessage('error', 'Ошибка при сохранении')
@@ -197,9 +233,9 @@ const deleteReminder = async (reminder) => {
   }
 
   try {
-    await ReminderService.deleteReminder(reminder.id)
+    await reminderService.deleteReminder(reminder.id)
     showNotificationMessage('success', 'Напоминание удалено')
-    loadReminders()
+    await loadReminders()
   } catch (error) {
     console.error('❌ Ошибка удаления:', error)
     showNotificationMessage('error', 'Ошибка при удалении')
@@ -262,7 +298,7 @@ onMounted(() => {
   padding: 1rem;
   background-color: var(--color-white, #ffffff);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.05));
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.05));
 }
 
 .filter-button {

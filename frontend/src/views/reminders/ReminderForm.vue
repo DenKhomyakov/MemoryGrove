@@ -96,14 +96,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import TextField from '@/components/UI/TextField.vue'
 import TextArea from '@/components/UI/TextArea.vue'
 import DateInput from '@/components/UI/DateInput.vue'
 import TimeInput from '@/components/UI/TimeInput.vue'
 import Select from '@/components/UI/Select.vue'
 import Button from '@/components/UI/Button.vue'
-import ReminderService from '@/services/reminderService'
+import reminderService from '@/services/reminderService'
 
 const props = defineProps({
   reminder: {
@@ -121,15 +121,23 @@ const emit = defineEmits(['submit', 'cancel', 'close'])
 const submitting = ref(false)
 const originalReminder = ref(null)
 
+// Получаем статусы из сервиса
+const statuses = reminderService.constructor.Status || {
+  PENDING: '6cc6ee82-b293-453b-a5df-94428f5f84ed',
+  SENT: '5f699cae-62e2-431b-a460-e9d594938424',
+  COMPLETED: '7665777b-e1e9-4be7-a8c5-fb2e7d457b20',
+  CANCELLED: 'e6ebcf79-82ac-4d92-bb35-0ec71a3845cd'
+}
+
 // Сегодняшняя дата для ограничения выбора
 const today = new Date().toISOString().split('T')[0]
 
 // Опции статусов для выпадающего списка
 const statusOptions = [
-  { value: ReminderService.Status.PENDING, label: 'Ожидает' },
-  { value: ReminderService.Status.SENT, label: 'Отправлено' },
-  { value: ReminderService.Status.COMPLETED, label: 'Выполнено' },
-  { value: ReminderService.Status.CANCELLED, label: 'Отменено' }
+  { value: statuses.PENDING, label: 'Ожидает' },
+  { value: statuses.SENT, label: 'Отправлено' },
+  { value: statuses.COMPLETED, label: 'Выполнено' },
+  { value: statuses.CANCELLED, label: 'Отменено' }
 ]
 
 // Форма
@@ -138,7 +146,7 @@ const form = reactive({
   description: '',
   date: '',
   time: '',
-  statusId: ReminderService.Status.PENDING
+  statusId: statuses.PENDING
 })
 
 // Ошибки
@@ -176,7 +184,7 @@ onMounted(() => {
     originalReminder.value = props.reminder
     form.title = props.reminder.title || ''
     form.description = props.reminder.description || ''
-    form.statusId = props.reminder.status?.id || ReminderService.Status.PENDING
+    form.statusId = props.reminder.status?.id || statuses.PENDING
 
     const { date, time } = parseDateTime(props.reminder.remindAt)
     form.date = date
@@ -233,6 +241,11 @@ const handleSubmit = () => {
   }
 
   emit('submit', reminderData)
+
+  // Сбрасываем submitting через небольшую задержку
+  setTimeout(() => {
+    submitting.value = false
+  }, 500)
 }
 
 // Отмена
