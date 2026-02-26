@@ -5,6 +5,7 @@ import com.memorygrove.backend.telegram.repository.TelegramBindingRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -98,10 +99,77 @@ public class MemoryGroveBot extends TelegramLongPollingBot {
 
         // Проверяем, является ли сообщение кодом привязки
         if (text.matches("^[A-Z0-9]{6}$")) {
-            processBindingCode(chatId, text, firstName, lastName, username);
+            // Вызываем транзакционный метод для обработки кода
+            processBindingCodeInTransaction(chatId, text, firstName, lastName, username);
         } else {
             sendUnknownCommandMessage(chatId);
         }
+    }
+
+    /**
+     * Транзакционный метод для обработки кода привязки
+     * Вынесен в отдельный метод с @Transactional чтобы избежать LazyInitializationException
+     *
+     * @param chatId ID чата Telegram
+     * @param code код привязки
+     * @param firstName имя пользователя в Telegram
+     * @param lastName фамилия пользователя в Telegram
+     * @param username username в Telegram
+     */
+    @Transactional
+    public void processBindingCodeInTransaction(Long chatId, String code, String firstName,
+                                                String lastName, String username) {
+        log.info("🔑 Попытка привязки с кодом: {} от chatId: {}", code, chatId);
+
+        Optional<TelegramBinding> bindingOpt = bindingRepository.findByBindingCode(code);
+
+        if (bindingOpt.isEmpty()) {
+            sendMessage(chatId, "❌ Код не найден. Проверьте правильность ввода.");
+            return;
+        }
+
+        TelegramBinding binding = bindingOpt.get();
+
+        // Проверяем, не истёк ли код
+        if (binding.getCodeExpiresAt() == null ||
+                binding.getCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            sendMessage(chatId, "❌ Срок действия кода истёк. Сгенерируйте новый код на сайте.");
+            return;
+        }
+
+        // Проверяем, не привязан ли уже этот чат к другому аккаунту
+        if (bindingRepository.existsByChatId(chatId) &&
+                !chatId.equals(binding.getChatId())) {
+            sendMessage(chatId, "❌ Этот Telegram аккаунт уже привязан к другому пользователю.");
+            return;
+        }
+
+        // Принудительно загружаем пользователя в рамках транзакции
+        String userEmail = binding.getUser().getEmail();
+
+        // Привязываем чат
+        binding.setChatId(chatId);
+        binding.setFirstName(firstName);
+        binding.setLastName(lastName);
+        binding.setTelegramUsername(username);
+        binding.setBindingCode(null);
+        binding.setCodeExpiresAt(null);
+        binding.setBoundAt(LocalDateTime.now());
+        binding.setNotificationsEnabled(true);
+
+        bindingRepository.save(binding);
+
+        log.info("✅ Telegram успешно привязан! Пользователь: {}, chatId: {}",
+                userEmail, chatId);
+
+        String successMessage = String.format(
+                "✅ *Успешно!*\n\n" +
+                        "Ваш Telegram аккаунт привязан к аккаунту *%s*.\n\n" +
+                        "Теперь вы будете получать уведомления о напоминаниях прямо сюда! 🔔",
+                userEmail
+        );
+
+        sendMessage(chatId, successMessage);
     }
 
     /**
@@ -132,67 +200,6 @@ public class MemoryGroveBot extends TelegramLongPollingBot {
                 "• Код привязки из 6 символов (например, A1B2C3)";
 
         sendMessage(chatId, message);
-    }
-
-    /**
-     * Обрабатывает код привязки, отправленный пользователем
-     *
-     * @param chatId ID чата Telegram
-     * @param code код привязки
-     * @param firstName имя пользователя в Telegram
-     * @param lastName фамилия пользователя в Telegram
-     * @param username username в Telegram
-     */
-    private void processBindingCode(Long chatId, String code, String firstName,
-                                    String lastName, String username) {
-        log.info("🔑 Попытка привязки с кодом: {} от chatId: {}", code, chatId);
-
-        Optional<TelegramBinding> bindingOpt = bindingRepository.findByBindingCode(code);
-
-        if (bindingOpt.isEmpty()) {
-            sendMessage(chatId, "❌ Код не найден. Проверьте правильность ввода.");
-            return;
-        }
-
-        TelegramBinding binding = bindingOpt.get();
-
-        // Проверяем, не истёк ли код
-        if (binding.getCodeExpiresAt() == null ||
-                binding.getCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            sendMessage(chatId, "❌ Срок действия кода истёк. Сгенерируйте новый код на сайте.");
-            return;
-        }
-
-        // Проверяем, не привязан ли уже этот чат к другому аккаунту
-        if (bindingRepository.existsByChatId(chatId) &&
-                !chatId.equals(binding.getChatId())) {
-            sendMessage(chatId, "❌ Этот Telegram аккаунт уже привязан к другому пользователю.");
-            return;
-        }
-
-        // Привязываем чат
-        binding.setChatId(chatId);
-        binding.setFirstName(firstName);
-        binding.setLastName(lastName);
-        binding.setTelegramUsername(username);
-        binding.setBindingCode(null);
-        binding.setCodeExpiresAt(null);
-        binding.setBoundAt(LocalDateTime.now());
-        binding.setNotificationsEnabled(true);
-
-        bindingRepository.save(binding);
-
-        log.info("✅ Telegram успешно привязан! Пользователь: {}, chatId: {}",
-                binding.getUser().getEmail(), chatId);
-
-        String successMessage = String.format(
-                "✅ *Успешно!*\n\n" +
-                        "Ваш Telegram аккаунт привязан к аккаунту *%s*.\n\n" +
-                        "Теперь вы будете получать уведомления о напоминаниях прямо сюда! 🔔",
-                binding.getUser().getEmail()
-        );
-
-        sendMessage(chatId, successMessage);
     }
 
     /**
