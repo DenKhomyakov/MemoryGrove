@@ -62,12 +62,8 @@
         Привяжите Telegram, чтобы получать уведомления о напоминаниях прямо в мессенджер
       </p>
 
-      <div v-if="generatingCode" class="code-generation">
-        <div class="spinner-small"></div>
-        <span>Генерация кода...</span>
-      </div>
-
-      <div v-else-if="bindingCode" class="code-display">
+      <!-- Состояние генерации кода -->
+      <div v-if="generatingCode" class="code-display">
         <div class="code-box">
           <span class="code">{{ bindingCode }}</span>
           <button
@@ -86,15 +82,19 @@
           <p class="code-hint">Код действителен 10 минут</p>
         </div>
 
-        <Button
-          variant="outline"
-          size="small"
-          @click="generateNewCode"
-        >
-          Сгенерировать новый код
-        </Button>
+        <div class="code-actions">
+          <Button
+            variant="outline"
+            size="small"
+            @click="generateNewCode"
+            :disabled="generating"
+          >
+            Сгенерировать новый код
+          </Button>
+        </div>
       </div>
 
+      <!-- Кнопка для генерации кода -->
       <div v-else>
         <Button
           variant="primary"
@@ -123,13 +123,14 @@ import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
 import apiClient from '@/services/api'
 
+// Состояния
 const loading = ref(true)
 const generating = ref(false)
-const generatingCode = ref(false)
 const unbinding = ref(false)
 const isBound = ref(false)
 const bindingInfo = ref({})
 const bindingCode = ref('')
+const generatingCode = ref(false) // Показываем ли код
 const notificationsEnabled = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
@@ -140,11 +141,13 @@ const loadBindingStatus = async () => {
   loading.value = true
   try {
     const response = await apiClient.get('/telegram/binding-status')
+    console.log('📥 Статус привязки:', response.data)
     bindingInfo.value = response.data
     isBound.value = response.data.bound
-    notificationsEnabled.value = response.data.notificationsEnabled
+    notificationsEnabled.value = response.data.notificationsEnabled || false
   } catch (error) {
     console.error('❌ Ошибка загрузки статуса:', error)
+    showNotificationMessage('error', 'Ошибка загрузки статуса привязки')
   } finally {
     loading.value = false
   }
@@ -156,13 +159,18 @@ const generateCode = async () => {
   try {
     const response = await apiClient.post('/telegram/generate-code')
     console.log('✅ Ответ от сервера:', response.data)
-    bindingCode.value = response.data.code
-    generatingCode.value = true
-    generating.value = false
-    showNotificationMessage('success', 'Код сгенерирован! Скопируйте его и отправьте боту.')
+
+    if (response.data && response.data.code) {
+      bindingCode.value = response.data.code
+      generatingCode.value = true
+      showNotificationMessage('success', 'Код сгенерирован! Скопируйте его и отправьте боту.')
+    } else {
+      throw new Error('Неверный формат ответа от сервера')
+    }
   } catch (error) {
     console.error('❌ Ошибка генерации кода:', error)
     showNotificationMessage('error', 'Ошибка при генерации кода')
+  } finally {
     generating.value = false
   }
 }
@@ -170,6 +178,7 @@ const generateCode = async () => {
 // Генерация нового кода
 const generateNewCode = async () => {
   bindingCode.value = ''
+  generatingCode.value = false
   await generateCode()
 }
 
@@ -189,9 +198,11 @@ const unbindTelegram = async () => {
   try {
     await apiClient.delete('/telegram/unbind')
     showNotificationMessage('success', 'Telegram отключён')
-    await loadBindingStatus()
+
+    // Сбрасываем состояния
     bindingCode.value = ''
     generatingCode.value = false
+    await loadBindingStatus()
   } catch (error) {
     console.error('❌ Ошибка отключения:', error)
     showNotificationMessage('error', 'Ошибка при отключении')
@@ -210,14 +221,18 @@ const toggleNotifications = async () => {
 // Форматирование даты
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
+  try {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)
+  } catch (e) {
+    return dateString
+  }
 }
 
 // Показать уведомление
@@ -227,6 +242,7 @@ const showNotificationMessage = (type, message) => {
   showNotification.value = true
 }
 
+// При монтировании загружаем статус
 onMounted(() => {
   loadBindingStatus()
 })
@@ -395,14 +411,6 @@ input:checked + .toggle-slider:before {
 }
 
 /* Код привязки */
-.code-generation {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-gray, #9e9e9e);
-  font-size: 14px;
-}
-
 .code-display {
   background-color: var(--color-white-smoke, #f5f5f5);
   border-radius: 12px;
@@ -469,5 +477,10 @@ input:checked + .toggle-slider:before {
   color: var(--color-gray, #9e9e9e) !important;
   font-style: italic;
   margin-top: 12px !important;
+}
+
+.code-actions {
+  display: flex;
+  justify-content: center;
 }
 </style>
