@@ -155,13 +155,14 @@ const generateCode = async () => {
   generating.value = true
   try {
     const response = await apiClient.post('/telegram/generate-code')
+    console.log('✅ Ответ от сервера:', response.data)
     bindingCode.value = response.data.code
     generatingCode.value = true
+    generating.value = false
     showNotificationMessage('success', 'Код сгенерирован! Скопируйте его и отправьте боту.')
   } catch (error) {
     console.error('❌ Ошибка генерации кода:', error)
     showNotificationMessage('error', 'Ошибка при генерации кода')
-  } finally {
     generating.value = false
   }
 }
