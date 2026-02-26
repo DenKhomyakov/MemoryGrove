@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260226200700" author="KhomyakovDA">
+
+        <comment>Изменение поля chat_id в таблице telegram_bindings: разрешаем NULL значения</comment>
+
+        <!-- Меняем ограничение с NOT NULL на NULL -->
+        <modifyDataType
+                tableName="telegram_bindings"
+                columnName="chat_id"
+                newDataType="BIGINT"/>
+
+        <!-- Явно снимаем NOT NULL constraint через SQL (для PostgreSQL) -->
+        <sql>
+            ALTER TABLE telegram_bindings ALTER COLUMN chat_id DROP NOT NULL;
+        </sql>
+
+        <rollback>
+            <!-- Возвращаем NOT NULL constraint -->
+            <sql>
+                ALTER TABLE telegram_bindings ALTER COLUMN chat_id SET NOT NULL;
+            </sql>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

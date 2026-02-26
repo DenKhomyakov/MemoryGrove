@@ -19,6 +19,10 @@ import java.util.UUID;
  * Позволяет связать аккаунт пользователя в системе с его Telegram-аккаунтом
  * для отправки уведомлений через бота
  * </p>
+ * <p>
+ * ВАЖНО: Поле chatId может быть null на этапе генерации кода привязки.
+ * Оно становится обязательным только после успешной привязки
+ * </p>
  */
 @Getter
 @Setter
@@ -47,11 +51,14 @@ public class TelegramBinding {
 
     /**
      * ID чата в Telegram
+     * <p>
+     * Может быть null на этапе генерации кода привязки.
+     * Заполняется только после успешной привязки через бота.
      * Уникален для каждого пользователя Telegram
+     * </p>
      */
-    @NotNull(message = "ID чата обязателен")
-    @Column(name = "chat_id", nullable = false, unique = true)
-    private Long chatId;
+    @Column(name = "chat_id", unique = true)
+    private Long chatId;  // Убрали @NotNull
 
     /**
      * Username пользователя в Telegram (опционально)

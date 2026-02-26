@@ -36,7 +36,6 @@ public class TelegramBindingService {
     private final UserRepository userRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    // ToDo: Вынести в application.properties
     /**
      * Длина генерируемого кода привязки (в символах)
      */
@@ -57,6 +56,7 @@ public class TelegramBindingService {
      * @param userId ID пользователя, запросившего код
      * @return сгенерированный код привязки
      * @throws EntityNotFoundException если пользователь не найден
+     * @throws IllegalStateException если Telegram уже привязан
      */
     public String generateBindingCode(UUID userId) {
         log.info("Генерация кода привязки для пользователя {}", userId);
@@ -66,35 +66,32 @@ public class TelegramBindingService {
                         String.format("Пользователь с ID '%s' не найден", userId)
                 ));
 
-        // Проверяем, не привязан ли уже Telegram
-        if (bindingRepository.existsByUserId(userId)) {
-            TelegramBinding existing = bindingRepository.findByUserId(userId).get();
+        // Проверяем, существует ли уже привязка
+        TelegramBinding binding = bindingRepository.findByUserId(userId)
+                .orElse(new TelegramBinding());
 
-            // Если пользователь уже привязал Telegram, не даём генерировать код
-            if (existing.getChatId() != null) {
-                log.warn("Пользователь {} уже привязал Telegram", userId);
-                throw new IllegalStateException("Telegram уже привязан к этому аккаунту");
-            }
+        // Если пользователь уже привязал Telegram, не даём генерировать код
+        if (binding.getChatId() != null) {
+            log.warn("Пользователь {} уже привязал Telegram", userId);
+            throw new IllegalStateException("Telegram уже привязан к этому аккаунту");
+        }
 
-            // Если есть действующий код, возвращаем его
-            if (existing.getBindingCode() != null &&
-                    existing.getCodeExpiresAt() != null &&
-                    existing.getCodeExpiresAt().isAfter(LocalDateTime.now())) {
-                log.debug("Возвращаем существующий код для пользователя {}", userId);
-                return existing.getBindingCode();
-            }
+        // Если есть действующий код, возвращаем его
+        if (binding.getBindingCode() != null &&
+                binding.getCodeExpiresAt() != null &&
+                binding.getCodeExpiresAt().isAfter(LocalDateTime.now())) {
+            log.debug("Возвращаем существующий код для пользователя {}", userId);
+            return binding.getBindingCode();
         }
 
         // Генерируем новый код
         String code = generateRandomCode();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES);
 
-        TelegramBinding binding = bindingRepository.findByUserId(userId)
-                .orElse(new TelegramBinding());
-
         binding.setUser(user);
         binding.setBindingCode(code);
         binding.setCodeExpiresAt(expiresAt);
+        // Не трогаем chatId - он остаётся null
 
         bindingRepository.save(binding);
 

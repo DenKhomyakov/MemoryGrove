@@ -18,4 +18,6 @@
 
     <include file="db/changelog/20260224204000_create_telegram_bindings.xml"/>
 
+    <include file="db/changelog/20260226200700_alter_telegram_bindings_chat_id_nullable.xml"/>
+
 </databaseChangeLog>
