@@ -80,25 +80,32 @@ public class MemoryGroveBot extends TelegramLongPollingBot {
      */
     private void handleMessage(Update update) {
         Long chatId = update.getMessage().getChatId();
-        String text = update.getMessage().getText().trim().toUpperCase();
+        String text = update.getMessage().getText().trim();
         String firstName = update.getMessage().getChat().getFirstName();
         String lastName = update.getMessage().getChat().getLastName();
         String username = update.getMessage().getChat().getUserName();
 
         log.info("📩 Получено сообщение от {} ({}): {}", firstName, chatId, text);
 
-        if ("/start".equals(text)) {
+        // Обрабатываем команду /start (регистронезависимо)
+        if ("/start".equalsIgnoreCase(text)) {
             sendWelcomeMessage(chatId);
             return;
         }
 
-        // Проверяем, является ли сообщение кодом привязки
-        if (text.matches("^[A-Z0-9]{6}$")) {
+        // Проверяем, является ли сообщение кодом привязки (только заглавные буквы и цифры, 6 символов)
+        String upperText = text.toUpperCase();
+        if (upperText.matches("^[A-Z0-9]{6}$")) {
             // Вызываем сервис для обработки кода
             TelegramBindingProcessor.BindingResult result = bindingProcessor.processBindingCode(
-                    chatId, text, firstName, lastName, username
+                    chatId, upperText, firstName, lastName, username
             );
             sendMessage(chatId, result.getMessage());
+
+            // Если привязка успешна, отправляем дополнительное приветственное сообщение
+            if (result.isSuccess()) {
+                sendPostBindingWelcomeMessage(chatId, firstName);
+            }
         } else {
             sendUnknownCommandMessage(chatId);
         }
@@ -117,6 +124,22 @@ public class MemoryGroveBot extends TelegramLongPollingBot {
                 "3️⃣ Скопируйте полученный код\n" +
                 "4️⃣ Отправьте его мне в ответном сообщении\n\n" +
                 "Код выглядит так: `A1B2C3` (6 символов)";
+
+        sendMessage(chatId, message);
+    }
+
+    /**
+     * Отправляет приветственное сообщение после успешной привязки
+     *
+     * @param chatId ID чата для отправки
+     * @param firstName имя пользователя в Telegram
+     */
+    private void sendPostBindingWelcomeMessage(Long chatId, String firstName) {
+        String message = String.format(
+                "🎉 *Рады приветствовать вас, %s!*\n\n" +
+                        "Чтобы управлять уведомлениями, зайдите в свой профиль на сайте.",
+                firstName != null ? firstName : "друг"
+        );
 
         sendMessage(chatId, message);
     }
