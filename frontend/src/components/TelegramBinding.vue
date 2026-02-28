@@ -62,8 +62,8 @@
         Привяжите Telegram, чтобы получать уведомления о напоминаниях прямо в мессенджер
       </p>
 
-      <!-- Состояние генерации кода -->
-      <div v-if="generatingCode" class="code-display">
+      <!-- Показываем код, если он есть -->
+      <div v-if="bindingCode" class="code-display">
         <div class="code-box">
           <span class="code">{{ bindingCode }}</span>
           <button
@@ -87,14 +87,14 @@
             variant="outline"
             size="small"
             @click="generateNewCode"
-            :disabled="generating"
+            :loading="generating"
           >
             Сгенерировать новый код
           </Button>
         </div>
       </div>
 
-      <!-- Кнопка для генерации кода -->
+      <!-- Кнопка для генерации первого кода -->
       <div v-else>
         <Button
           variant="primary"
@@ -130,7 +130,6 @@ const unbinding = ref(false)
 const isBound = ref(false)
 const bindingInfo = ref({})
 const bindingCode = ref('')
-const generatingCode = ref(false) // Показываем ли код
 const notificationsEnabled = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
@@ -145,6 +144,11 @@ const loadBindingStatus = async () => {
     bindingInfo.value = response.data
     isBound.value = response.data.bound
     notificationsEnabled.value = response.data.notificationsEnabled || false
+
+    // Если пользователь привязан, сбрасываем код
+    if (response.data.bound) {
+      bindingCode.value = ''
+    }
   } catch (error) {
     console.error('❌ Ошибка загрузки статуса:', error)
     showNotificationMessage('error', 'Ошибка загрузки статуса привязки')
@@ -153,7 +157,7 @@ const loadBindingStatus = async () => {
   }
 }
 
-// Генерация кода привязки
+// Генерация первого кода привязки
 const generateCode = async () => {
   generating.value = true
   try {
@@ -162,7 +166,6 @@ const generateCode = async () => {
 
     if (response.data && response.data.code) {
       bindingCode.value = response.data.code
-      generatingCode.value = true
       showNotificationMessage('success', 'Код сгенерирован! Скопируйте его и отправьте боту.')
     } else {
       throw new Error('Неверный формат ответа от сервера')
@@ -177,9 +180,24 @@ const generateCode = async () => {
 
 // Генерация нового кода
 const generateNewCode = async () => {
-  bindingCode.value = ''
-  generatingCode.value = false
-  await generateCode()
+  generating.value = true
+
+  try {
+    const response = await apiClient.post('/telegram/generate-code')
+    console.log('✅ Новый код сгенерирован:', response.data)
+
+    if (response.data && response.data.code) {
+      bindingCode.value = response.data.code
+      showNotificationMessage('success', 'Новый код сгенерирован!')
+    } else {
+      throw new Error('Неверный формат ответа от сервера')
+    }
+  } catch (error) {
+    console.error('❌ Ошибка генерации нового кода:', error)
+    showNotificationMessage('error', 'Ошибка при генерации нового кода')
+  } finally {
+    generating.value = false
+  }
 }
 
 // Копирование кода в буфер обмена
@@ -201,7 +219,6 @@ const unbindTelegram = async () => {
 
     // Сбрасываем состояния
     bindingCode.value = ''
-    generatingCode.value = false
     await loadBindingStatus()
   } catch (error) {
     console.error('❌ Ошибка отключения:', error)

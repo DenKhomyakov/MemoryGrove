@@ -49,8 +49,8 @@ public class TelegramBindingService {
     /**
      * Генерирует уникальный код для привязки Telegram
      * <p>
-     * Если у пользователя уже есть действующий код, возвращает его.
-     * В противном случае генерирует новый код сроком действия 10 минут
+     * Всегда генерирует новый код, даже если старый ещё действителен.
+     * Предыдущий код перезаписывается.
      * </p>
      *
      * @param userId ID пользователя, запросившего код
@@ -76,15 +76,7 @@ public class TelegramBindingService {
             throw new IllegalStateException("Telegram уже привязан к этому аккаунту");
         }
 
-        // Если есть действующий код, возвращаем его
-        if (binding.getBindingCode() != null &&
-                binding.getCodeExpiresAt() != null &&
-                binding.getCodeExpiresAt().isAfter(LocalDateTime.now())) {
-            log.debug("Возвращаем существующий код для пользователя {}", userId);
-            return binding.getBindingCode();
-        }
-
-        // Генерируем новый код
+        // Всегда генерируем новый код (даже если старый ещё действителен)
         String code = generateRandomCode();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES);
 
@@ -95,7 +87,7 @@ public class TelegramBindingService {
 
         bindingRepository.save(binding);
 
-        log.info("✅ Код привязки {} сгенерирован для пользователя {}, истекает {}",
+        log.info("✅ Новый код привязки {} сгенерирован для пользователя {}, истекает {}",
                 code, userId, expiresAt);
         return code;
     }
