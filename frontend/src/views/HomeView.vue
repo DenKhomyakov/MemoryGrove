@@ -9,13 +9,23 @@
     <section class="modules-section">
       <h2>Основные модули</h2>
       <div class="modules-grid">
-        <router-link to="/journal" class="module-card">
-          <div class="module-icon">🌳</div>
-          <h3>Безопасный лес</h3>
-          <p>Личный дневник, система напоминаний, данные о пациенте</p>
+        <!-- Карточка "Мои данные" (ведёт в профиль) -->
+        <router-link to="/profile" class="module-card">
+          <div class="module-icon">👤</div>
+          <h3>Мои данные</h3>
+          <p>Ваши личные данные, ФИО, контактная информация</p>
           <div class="module-status available">Доступно</div>
         </router-link>
 
+        <!-- Карточка "Безопасный лес" (дневник) -->
+        <router-link to="/journal" class="module-card">
+          <div class="module-icon">🌳</div>
+          <h3>Безопасный лес</h3>
+          <p>Личный дневник, где вы можете записывать свои мысли и чувства</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
+
+        <!-- Карточка "Напоминания" -->
         <router-link to="/reminders" class="module-card">
           <div class="module-icon">⏰</div>
           <h3>Напоминания</h3>
@@ -23,24 +33,27 @@
           <div class="module-status available">Доступно</div>
         </router-link>
 
+        <!-- Карточка "Восстановление связей" (скоро) -->
         <div class="module-card">
           <div class="module-icon">🤝</div>
           <h3>Восстановление связей</h3>
-          <p>Контакты доверия, контролируемое общение с близкими</p>
+          <p>Контакты доверия, общение с близкими</p>
           <div class="module-status">Скоро</div>
         </div>
 
+        <!-- Карточка "Цифровая память" (скоро) -->
         <div class="module-card">
           <div class="module-icon">📸</div>
           <h3>Цифровая память</h3>
-          <p>Фотографии, значимые места, коллекция интересов</p>
+          <p>Фотографии, значимые места, любимые фильмы и книги</p>
           <div class="module-status">Скоро</div>
         </div>
 
+        <!-- Карточка "Психологическая помощь" -->
         <router-link to="/help" class="module-card help-card">
           <div class="module-icon">🫂</div>
           <h3>Психологическая помощь</h3>
-          <p>Горячие линии, полезные книги, форумы поддержки</p>
+          <p>Горячие линии, полезные книги, поддерживающие ресурсы</p>
           <div class="module-status available">Доступно</div>
         </router-link>
       </div>
@@ -110,7 +123,7 @@
 
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
 
@@ -131,6 +144,7 @@
 .module-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 24px var(--shadow-color, rgba(0,0,0,0.15));
+  border-color: var(--color-primary, #88d424);
 }
 
 .help-card {
