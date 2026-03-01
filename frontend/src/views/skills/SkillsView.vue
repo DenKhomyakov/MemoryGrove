@@ -59,8 +59,9 @@
           @click="selectedCategory = selectedCategory === stat.category ? 'all' : stat.category"
         >
           <div class="category-header" :style="{ backgroundColor: getCategoryColor(stat.category) + '20' }">
+            <!-- Оставляем только один значок здесь -->
             <span class="category-icon">{{ getCategoryIcon(stat.category) }}</span>
-            <span class="category-name">{{ stat.displayName }}</span>
+            <span class="category-name">{{ getCategoryDisplayName(stat.category) }}</span>
           </div>
           <div class="category-progress">
             <div class="progress-bar">
@@ -146,8 +147,9 @@
           class="category-group"
         >
           <div class="category-group-header" :style="{ borderLeftColor: getCategoryColor(category.name) }">
+            <!-- Оставляем только один значок здесь, убираем дублирование в названии -->
             <span class="category-group-icon">{{ getCategoryIcon(category.name) }}</span>
-            <h3 class="category-group-title">{{ getCategoryDisplayName(category.name) }}</h3>
+            <h3 class="category-group-title">{{ getCategoryDisplayNameWithoutIcon(category.name) }}</h3>
             <span class="category-group-count">{{ category.skills.length }}</span>
           </div>
 
@@ -211,9 +213,16 @@ const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
 
-// Получить отображаемое название категории
+// Получить отображаемое название категории с эмодзи
 const getCategoryDisplayName = (category) => {
   return skillService.constructor.getCategoryDisplayName(category)
+}
+
+// Получить отображаемое название категории без эмодзи (для заголовков групп)
+const getCategoryDisplayNameWithoutIcon = (category) => {
+  const fullName = skillService.constructor.getCategoryDisplayName(category)
+  // Убираем эмодзи и пробел в начале
+  return fullName.replace(/^[^\s]+\s/, '')
 }
 
 // Получить иконку категории
@@ -527,6 +536,7 @@ onMounted(() => {
 
 .category-icon {
   font-size: 20px;
+  flex-shrink: 0;
 }
 
 .category-name {
@@ -656,6 +666,7 @@ onMounted(() => {
 
 .category-group-icon {
   font-size: 24px;
+  flex-shrink: 0;
 }
 
 .category-group-title {
