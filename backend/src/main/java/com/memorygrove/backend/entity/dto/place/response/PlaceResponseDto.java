@@ -170,6 +170,29 @@ public class PlaceResponseDto {
     private String formattedCreatedAt;
 
     /**
+     * Отформатированная дата редактирования для отображения на фронтенде
+     */
+    @Schema(
+            description = "Отформатированная дата редактирования",
+            example = "1 марта 2026, 16:45",
+            accessMode = Schema.AccessMode.READ_ONLY,
+            nullable = true
+    )
+    @JsonProperty(value = "formattedUpdatedAt", access = JsonProperty.Access.READ_ONLY)
+    private String formattedUpdatedAt;
+
+    /**
+     * Флаг, было ли место отредактировано
+     */
+    @Schema(
+            description = "Флаг, было ли место отредактировано",
+            example = "true",
+            accessMode = Schema.AccessMode.READ_ONLY
+    )
+    @JsonProperty(value = "isEdited", access = JsonProperty.Access.READ_ONLY)
+    private boolean isEdited;
+
+    /**
      * Конвертирует сущность SignificantPlace в DTO для ответа
      *
      * @param place сущность значимого места
@@ -195,6 +218,12 @@ public class PlaceResponseDto {
         if (place.getCreatedAt() != null) {
             dto.setFormattedCreatedAt(place.getCreatedAt().format(formatter));
         }
+
+        if (place.getUpdatedAt() != null) {
+            dto.setFormattedUpdatedAt(place.getUpdatedAt().format(formatter));
+        }
+
+        dto.setEdited(place.getUpdatedAt() != null && !place.getUpdatedAt().equals(place.getCreatedAt()));
 
         return dto;
     }

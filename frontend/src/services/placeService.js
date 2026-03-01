@@ -93,6 +93,15 @@ class PlaceService {
   }
 
   /**
+   * Проверить, было ли место отредактировано
+   * @param {Object} place - объект места
+   * @returns {boolean}
+   */
+  static isEdited(place) {
+    return place.updatedAt && place.updatedAt !== place.createdAt
+  }
+
+  /**
    * Получить иконку для категории
    * @param {string} category - категория места
    * @returns {string} эмодзи-иконка
