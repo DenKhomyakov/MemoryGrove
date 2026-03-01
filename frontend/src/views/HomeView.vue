@@ -33,6 +33,14 @@
           <div class="module-status available">Доступно</div>
         </router-link>
 
+        <!-- Карточка "Значимые и любимые места" -->
+        <router-link to="/places" class="module-card">
+          <div class="module-icon">📍</div>
+          <h3>Значимые места</h3>
+          <p>Важные места: дом, поликлиника, любимые парки</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
+
         <!-- Карточка "Восстановление связей" (скоро) -->
         <div class="module-card">
           <div class="module-icon">🤝</div>

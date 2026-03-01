@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260301220000" author="KhomyakovDA">
+
+        <createTable tableName="significant_places" remarks="Значимые места пользователя">
+
+            <column name="id" type="UUID" remarks="ID места">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(100)" remarks="Название места">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="address" type="VARCHAR(250)" remarks="Адрес">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)" remarks="Описание/заметки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="category" type="VARCHAR(50)" remarks="Категория (Дом, Медицина, Работа, Отдых, Образование, Другое)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="latitude" type="DOUBLE" remarks="Широта (для карт)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="longitude" type="DOUBLE" remarks="Долгота (для карт)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="is_home" type="BOOLEAN" defaultValueBoolean="false" remarks="Флаг домашнего адреса">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_work" type="BOOLEAN" defaultValueBoolean="false" remarks="Флаг места работы/учёбы">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_medical" type="BOOLEAN" defaultValueBoolean="false" remarks="Флаг медицинского учреждения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sort_order" type="INT" remarks="Порядок сортировки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к users -->
+        <addForeignKeyConstraint
+                baseTableName="significant_places"
+                baseColumnNames="user_id"
+                constraintName="fk_significant_places_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="significant_places" indexName="idx_places_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="significant_places" indexName="idx_places_category">
+            <column name="category"/>
+        </createIndex>
+
+        <createIndex tableName="significant_places" indexName="idx_places_sort_order">
+            <column name="sort_order"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="significant_places"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -20,4 +20,6 @@
 
     <include file="db/changelog/20260226200700_alter_telegram_bindings_chat_id_nullable.xml"/>
 
+    <include file="db/changelog/20260301005100_create_significant_places.xml"/>
+
 </databaseChangeLog>
