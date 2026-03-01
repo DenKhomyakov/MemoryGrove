@@ -22,4 +22,6 @@
 
     <include file="db/changelog/20260301005100_create_significant_places.xml"/>
 
+    <include file="db/changelog/20260301152800_create_interests.xml"/>
+
 </databaseChangeLog>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260301152800" author="KhomyakovDA">
+
+        <comment>Создание таблицы interests для хранения коллекции интересов пользователя</comment>
+
+        <createTable tableName="interests" remarks="Коллекция интересов пользователя (фильмы, книги, музыка и т.д.)">
+
+            <column name="id" type="UUID" remarks="ID интереса">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="category" type="VARCHAR(20)" remarks="Категория (FILM, BOOK, MUSIC, GAME, SPORT, HOBBY, OTHER)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(200)" remarks="Название">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="creator" type="VARCHAR(200)" remarks="Автор/исполнитель/создатель">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="year" type="INT" remarks="Год создания/выхода">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="genre" type="VARCHAR(100)" remarks="Жанр">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="description" type="VARCHAR(1000)" remarks="Описание/заметки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="liked" type="BOOLEAN" remarks="Нравится (true) / не нравится (false)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="rating" type="INT" remarks="Оценка (1-5)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="is_current" type="BOOLEAN" defaultValueBoolean="true" remarks="Флаг текущего интереса">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sort_order" type="INT" remarks="Порядок сортировки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к users -->
+        <addForeignKeyConstraint
+                baseTableName="interests"
+                baseColumnNames="user_id"
+                constraintName="fk_interests_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="interests" indexName="idx_interests_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="interests" indexName="idx_interests_category">
+            <column name="category"/>
+        </createIndex>
+
+        <createIndex tableName="interests" indexName="idx_interests_user_category">
+            <column name="user_id"/>
+            <column name="category"/>
+        </createIndex>
+
+        <createIndex tableName="interests" indexName="idx_interests_sort_order">
+            <column name="sort_order"/>
+        </createIndex>
+
+        <!-- Проверка для rating (1-5) - используем CDATA для экранирования -->
+        <sql>
+            <![CDATA[
+            ALTER TABLE interests ADD CONSTRAINT check_rating_range
+                CHECK (rating IS NULL OR (rating >= 1 AND rating <= 5));
+            ]]>
+        </sql>
+
+        <rollback>
+            <dropTable tableName="interests"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -41,6 +41,14 @@
           <div class="module-status available">Доступно</div>
         </router-link>
 
+        <!-- Карточка "Значимые места" -->
+        <router-link to="/interests" class="module-card">
+          <div class="module-icon">🎨</div>
+          <h3>Коллекция интересов</h3>
+          <p>Фильмы, книги, музыка, игры и хобби</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
+
         <!-- Карточка "Восстановление связей" (скоро) -->
         <div class="module-card">
           <div class="module-icon">🤝</div>
