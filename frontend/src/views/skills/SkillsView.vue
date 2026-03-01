@@ -59,9 +59,8 @@
           @click="selectedCategory = selectedCategory === stat.category ? 'all' : stat.category"
         >
           <div class="category-header" :style="{ backgroundColor: getCategoryColor(stat.category) + '20' }">
-            <!-- Оставляем только один значок здесь -->
             <span class="category-icon">{{ getCategoryIcon(stat.category) }}</span>
-            <span class="category-name">{{ getCategoryDisplayName(stat.category) }}</span>
+            <span class="category-name">{{ getCategoryDisplayNameWithoutIcon(stat.category) }}</span>
           </div>
           <div class="category-progress">
             <div class="progress-bar">
@@ -218,7 +217,7 @@ const getCategoryDisplayName = (category) => {
   return skillService.constructor.getCategoryDisplayName(category)
 }
 
-// Получить отображаемое название категории без эмодзи (для заголовков групп)
+// Получить отображаемое название категории без эмодзи (для заголовков групп и статистики)
 const getCategoryDisplayNameWithoutIcon = (category) => {
   const fullName = skillService.constructor.getCategoryDisplayName(category)
   // Убираем эмодзи и пробел в начале
@@ -430,7 +429,7 @@ onMounted(() => {
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 12px var(--shadow-color, rgba(0,0,0,0.05));
+  box-shadow: 0 4px 12px var(--shadow-color, rgba(0, 0, 0, 0.05));
 }
 
 .stats-grid {
@@ -520,7 +519,7 @@ onMounted(() => {
 
 .category-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-color, rgba(0,0,0,0.1));
+  box-shadow: 0 4px 12px var(--shadow-color, rgba(0, 0, 0, 0.1));
 }
 
 .category-stat-card.active {
@@ -580,7 +579,7 @@ onMounted(() => {
   padding: 1rem;
   background-color: var(--color-white, #ffffff);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.05));
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.05));
 }
 
 .search-box {
