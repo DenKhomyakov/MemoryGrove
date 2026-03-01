@@ -41,11 +41,19 @@
           <div class="module-status available">Доступно</div>
         </router-link>
 
-        <!-- Карточка "Значимые места" -->
+        <!-- Карточка "Коллекция интересов" -->
         <router-link to="/interests" class="module-card">
           <div class="module-icon">🎨</div>
           <h3>Коллекция интересов</h3>
           <p>Фильмы, книги, музыка, игры и хобби</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
+
+        <!-- Карточка "Анкета навыков" -->
+        <router-link to="/skills" class="module-card">
+          <div class="module-icon">📋</div>
+          <h3>Анкета навыков</h3>
+          <p>Отслеживайте, какие навыки вы уже освоили</p>
           <div class="module-status available">Доступно</div>
         </router-link>
 

@@ -10,6 +10,7 @@ import JournalEntryView from '../views/journal/JournalEntryView.vue'
 import RemindersView from '../views/reminders/RemindersView.vue'
 import PlacesView from '../views/places/PlacesView.vue'
 import InterestsView from '../views/interests/InterestsView.vue'
+import SkillsView from '../views/skills/SkillsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,6 +55,12 @@ const router = createRouter({
       path: '/interests',
       name: 'interests',
       component: InterestsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/skills',
+      name: 'skills',
+      component: SkillsView,
       meta: { requiresAuth: true }
     },
     {
