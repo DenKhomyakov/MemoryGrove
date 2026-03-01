@@ -7,7 +7,6 @@
       </div>
 
       <div class="badges">
-        <span v-if="place.isEdited" class="edited-indicator" title="Было отредактировано">📝</span>
         <span v-if="place.home" class="badge home-badge" title="Домашний адрес">🏠 Дом</span>
         <span v-if="place.work" class="badge work-badge" title="Место работы">💼 Работа</span>
         <span v-if="place.medical" class="badge medical-badge" title="Медицинское учреждение">🏥 Медицина</span>
@@ -34,6 +33,9 @@
         <span v-if="place.formattedUpdatedAt" class="meta-item edited">
           • Изменено: {{ place.formattedUpdatedAt }}
         </span>
+        <span v-if="place.isEdited" class="edited-indicator" title="Было отредактировано">
+          📝
+        </span>
       </div>
 
       <div class="card-actions">
@@ -57,7 +59,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import placeService from '@/services/placeService'
 
 const props = defineProps({
@@ -68,11 +69,6 @@ const props = defineProps({
 })
 
 defineEmits(['edit', 'delete'])
-
-// Вычисляемое поле для проверки редактирования
-const isEdited = computed(() => {
-  return props.place.updatedAt && props.place.updatedAt !== props.place.createdAt
-})
 
 // Получить иконку категории
 const getCategoryIcon = (category) => {
@@ -159,20 +155,6 @@ const formatDate = (dateString) => {
   align-items: center;
 }
 
-.edited-indicator {
-  font-size: 16px;
-  opacity: 0.7;
-  cursor: help;
-  transition: opacity 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  margin-right: 2px;
-}
-
-.edited-indicator:hover {
-  opacity: 1;
-}
-
 .badge {
   font-size: 11px;
   padding: 4px 8px;
@@ -246,11 +228,25 @@ const formatDate = (dateString) => {
   font-size: 11px;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
 .meta-item.edited {
   color: var(--color-primary, #88d424);
+}
+
+.edited-indicator {
+  font-size: 14px;
+  opacity: 0.7;
+  cursor: help;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.edited-indicator:hover {
+  opacity: 1;
 }
 
 .card-actions {
