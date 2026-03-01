@@ -100,7 +100,7 @@
       </div>
 
       <!-- Рейтинг (звёзды) - показываем только если есть лайк -->
-      <div v-if="form.liked === true" class="form-row">
+      <div v-if="form.liked !== null" class="form-row">
         <label class="section-label">Оценка</label>
         <div class="rating-stars">
           <span
@@ -300,15 +300,26 @@ const getDescriptionPlaceholder = computed(() => {
 })
 
 // Получить текстовое описание рейтинга
-const getRatingText = (rating) => {
-  const texts = {
-    1: 'Не понравилось',
-    2: 'Так себе',
-    3: 'Нормально',
-    4: 'Хорошо',
-    5: 'Отлично!'
+const getRatingText = (rating, liked) => {
+  if (liked === true) {
+    const texts = {
+      1: 'Еле нравится',
+      2: 'Немного нравится',
+      3: 'Нормально',
+      4: 'Очень нравится',
+      5: 'Обожаю!'
+    }
+    return texts[rating] || ''
+  } else {
+    const texts = {
+      1: 'Ужасно',
+      2: 'Не нравится',
+      3: 'Так себе',
+      4: 'Терпимо',
+      5: 'Могло быть хуже'
+    }
+    return texts[rating] || ''
   }
-  return texts[rating] || ''
 }
 
 // Сброс полей при смене категории

@@ -52,16 +52,22 @@
         💔
       </button>
 
-      <!-- Звёздный рейтинг -->
+      <!-- Звёздный рейтинг (показываем для обоих типов оценок) -->
       <div class="rating-stars" v-if="interest.liked !== null">
         <span
           v-for="star in 5"
           :key="star"
           class="star"
-          :class="{ active: star <= (interest.rating || 0) }"
+          :class="{
+            active: star <= (interest.rating || 0),
+            'dislike-mode': interest.liked === false
+          }"
           @click.stop="setRating(star)"
         >
           ★
+        </span>
+        <span class="rating-hint" v-if="interest.rating">
+          {{ getRatingText(interest.rating, interest.liked) }}
         </span>
       </div>
     </div>
@@ -133,13 +139,36 @@ const toggleLike = (liked) => {
   })
 }
 
-// Установка рейтинга
+// Установка рейтинга (работает и для лайков, и для дизлайков)
 const setRating = (rating) => {
-  if (props.interest.liked) {
+  if (props.interest.liked !== null) {
     emit('update-like', props.interest.id, {
-      liked: true,
+      liked: props.interest.liked,
       rating
     })
+  }
+}
+
+// Получить текстовое описание рейтинга в зависимости от того, лайк это или дизлайк
+const getRatingText = (rating, liked) => {
+  if (liked === true) {
+    const texts = {
+      1: 'Еле нравится',
+      2: 'Немного нравится',
+      3: 'Нормально',
+      4: 'Очень нравится',
+      5: 'Обожаю!'
+    }
+    return texts[rating] || ''
+  } else {
+    const texts = {
+      1: 'Ужасно',
+      2: 'Не нравится',
+      3: 'Так себе',
+      4: 'Терпимо',
+      5: 'Могло быть хуже'
+    }
+    return texts[rating] || ''
   }
 }
 
@@ -319,8 +348,10 @@ const formatDate = (dateString) => {
 
 .rating-stars {
   display: flex;
+  align-items: center;
   gap: 4px;
   margin-left: auto;
+  flex-wrap: wrap;
 }
 
 .star {
@@ -334,8 +365,18 @@ const formatDate = (dateString) => {
   color: var(--color-warning, #ff9800);
 }
 
+.star.dislike-mode.active {
+  color: #666;
+}
+
 .star:hover {
   transform: scale(1.2);
+}
+
+.rating-hint {
+  color: var(--color-gray, #9e9e9e);
+  font-size: 12px;
+  margin-left: 8px;
 }
 
 /* Футер */
