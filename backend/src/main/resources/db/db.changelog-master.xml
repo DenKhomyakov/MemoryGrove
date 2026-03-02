@@ -26,4 +26,6 @@
 
     <include file="db/changelog/20260301185900_create_skills.xml"/>
 
+    <include file="db/changelog/20260302202200_create_memory_photos.xml"/>
+
 </databaseChangeLog>
