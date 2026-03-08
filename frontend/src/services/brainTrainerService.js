@@ -69,6 +69,21 @@ class BrainTrainerService {
   }
 
   /**
+   * Отправить результаты ассоциаций
+   * @param {Object} data - { correct, total, percentage, timeSeconds }
+   * @returns {Promise<void>}
+   */
+  async submitAssociationResult(data) {
+    try {
+      await apiClient.post('/brain/association/result', data)
+      console.log('✅ Результаты ассоциаций отправлены:', data)
+    } catch (error) {
+      console.error('❌ Ошибка отправки результатов:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
    * Получить всю статистику по упражнениям
    * @returns {Promise<Array>} массив со статистикой по каждому упражнению
    */

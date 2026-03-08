@@ -67,6 +67,15 @@
           @click="openGame('poem')"
         />
       </div>
+
+      <!-- Ассоциации -->
+      <ExerciseCard
+        type="ASSOCIATION"
+        title="🔗 Ассоциации"
+        description="Подбирайте ассоциации к словам из предложенных вариантов"
+        :stats="getStatsForType('ASSOCIATION')"
+        @click="openGame('association')"
+      />
     </div>
 
     <!-- Компоненты игр -->
@@ -80,6 +89,10 @@
 
     <div v-if="activeGame === 'poem'" class="game-container">
       <PoemMemorization @back="closeGame" />
+    </div>
+
+    <div v-if="activeGame === 'association'" class="game-container">
+      <Associations @back="closeGame" />
     </div>
 
     <!-- Уведомления -->
@@ -102,6 +115,7 @@ import ExerciseCard from './components/ExerciseCard.vue'
 import ArithmeticChain from './games/ArithmeticChain.vue'
 import TextComprehension from './games/TextComprehension.vue'
 import PoemMemorization from './games/PoemMemorization.vue'
+import Associations from './games/Associations.vue'
 import brainTrainerService from '@/services/brainTrainerService'
 
 const router = useRouter()
