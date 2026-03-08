@@ -28,4 +28,6 @@
 
     <include file="db/changelog/20260302202200_create_memory_photos.xml"/>
 
+    <include file="db/changelog/20260308174400_create_exercise_stats.xml"/>
+
 </databaseChangeLog>

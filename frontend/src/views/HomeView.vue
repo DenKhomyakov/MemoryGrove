@@ -65,10 +65,19 @@
           <div class="module-status">Скоро</div>
         </div>
 
+        <!-- Карточка "Цифровая память" -->
         <router-link to="/memory/photos" class="module-card">
           <div class="module-icon">📸</div>
           <h3>Цифровая память</h3>
           <p>Фотографии, значимые места, коллекция интересов</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
+
+        <!-- Карточка "Тренажёр памяти" -->
+        <router-link to="/brain-trainer" class="module-card">
+          <div class="module-icon">🧠</div>
+          <h3>Тренажёр памяти</h3>
+          <p>Упражнения для тренировки внимания и памяти</p>
           <div class="module-status available">Доступно</div>
         </router-link>
 

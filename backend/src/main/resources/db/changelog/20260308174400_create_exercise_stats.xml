@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260308174400" author="KhomyakovDA">
+
+        <comment>Создание таблицы exercise_stats для хранения статистики упражнений для тренировки памяти</comment>
+
+        <createTable tableName="exercise_stats" remarks="Статистика упражнений для тренировки памяти">
+
+            <column name="id" type="UUID" remarks="Уникальный идентификатор записи статистики">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="exercise_type" type="VARCHAR(50)" remarks="Тип упражнения (ARITHMETIC, TEXT_COMPREHENSION, POEM, ASSOCIATION, SEQUENCE, REVERSE_WORD, ODD_ONE_OUT, SCHULTE_TABLE)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="attempts" type="INT" defaultValueNumeric="0" remarks="Общее количество попыток">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="successes" type="INT" defaultValueNumeric="0" remarks="Количество успешных попыток">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="best_score" type="INT" remarks="Лучший результат (максимальная длина цепочки, количество правильных ответов и т.д.)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="best_time_seconds" type="INT" remarks="Лучшее время в секундах">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="last_attempt_at" type="TIMESTAMP" remarks="Дата и время последней попытки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания записи">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к users -->
+        <addForeignKeyConstraint
+                baseTableName="exercise_stats"
+                baseColumnNames="user_id"
+                constraintName="fk_exercise_stats_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Уникальное ограничение: один пользователь - одна запись на тип упражнения -->
+        <addUniqueConstraint
+                tableName="exercise_stats"
+                columnNames="user_id, exercise_type"
+                constraintName="uk_exercise_stats_user_type"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="exercise_stats" indexName="idx_exercise_stats_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="exercise_stats" indexName="idx_exercise_stats_exercise_type">
+            <column name="exercise_type"/>
+        </createIndex>
+
+        <createIndex tableName="exercise_stats" indexName="idx_exercise_stats_last_attempt_at">
+            <column name="last_attempt_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="exercise_stats"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
