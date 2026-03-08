@@ -54,6 +54,21 @@ class BrainTrainerService {
   }
 
   /**
+   * Отправить результаты заучивания стиха
+   * @param {Object} data - { correct, similarity, timeSeconds, memorizingTime }
+   * @returns {Promise<void>}
+   */
+  async submitPoemResult(data) {
+    try {
+      await apiClient.post('/brain/poem/result', data)
+      console.log('✅ Результаты заучивания стиха отправлены:', data)
+    } catch (error) {
+      console.error('❌ Ошибка отправки результатов:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
    * Получить всю статистику по упражнениям
    * @returns {Promise<Array>} массив со статистикой по каждому упражнению
    */

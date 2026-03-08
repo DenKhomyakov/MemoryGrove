@@ -2,6 +2,7 @@ package com.memorygrove.backend.controller;
 
 import com.memorygrove.backend.dictionary.ExerciseType;
 import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.PoemResultRequestDto;
 import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
@@ -129,6 +130,32 @@ public class BrainTrainerController {
         log.info("Получение результатов понимания текста от пользователя {}", userId);
 
         brainTrainerService.processTextComprehensionResult(userId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Отправляет результаты заучивания стиха
+     *
+     * @param requestDto DTO с результатами
+     * @return пустой ответ с HTTP статусом 200 OK
+     */
+    @Operation(
+            summary = "Отправить результаты заучивания стиха",
+            description = "Принимает результаты упражнения и обновляет статистику"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Результаты обработаны"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
+    @PostMapping("/poem/result")
+    public ResponseEntity<Void> submitPoemResult(
+            @Valid @RequestBody PoemResultRequestDto requestDto
+    ) {
+        UUID userId = getCurrentUserId();
+        log.info("Получение результатов заучивания стиха от пользователя {}", userId);
+
+        brainTrainerService.processPoemResult(userId, requestDto);
         return ResponseEntity.ok().build();
     }
 

@@ -4,6 +4,7 @@ import com.memorygrove.backend.dictionary.ExerciseType;
 import com.memorygrove.backend.entity.dbo.ExerciseStats;
 import com.memorygrove.backend.entity.dbo.User;
 import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.PoemResultRequestDto;
 import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
@@ -122,6 +123,26 @@ public class BrainTrainerService {
 
         log.info("✅ Результаты обработаны. Успешно: {}, правильных ответов: {} из {}, время: {} сек",
                 isSuccess, requestDto.getCorrectAnswers(), requestDto.getTotalQuestions(), requestDto.getTimeSeconds());
+    }
+
+    /**
+     * Обрабатывает результат заучивания стиха и обновляет статистику
+     *
+     * @param userId ID пользователя
+     * @param requestDto DTO с результатами
+     */
+    public void processPoemResult(UUID userId, PoemResultRequestDto requestDto) {
+        log.info("Обработка результатов заучивания стиха для пользователя {}", userId);
+
+        // Считаем упражнение успешным при схожести 80% и выше
+        boolean isSuccess = requestDto.getCorrect() == 1;
+
+        // Обновляем статистику
+        updateStats(userId, ExerciseType.POEM, isSuccess,
+                requestDto.getSimilarity(), requestDto.getTimeSeconds());
+
+        log.info("✅ Результаты обработаны. Успешно: {}, схожесть: {}%, время: {} сек",
+                isSuccess, requestDto.getSimilarity(), requestDto.getTimeSeconds());
     }
 
     /**
