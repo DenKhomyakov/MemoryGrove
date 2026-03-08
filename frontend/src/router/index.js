@@ -13,6 +13,7 @@ import InterestsView from '../views/interests/InterestsView.vue'
 import SkillsView from '../views/skills/SkillsView.vue'
 import MemoryPhotosView from '../views/memory/MemoryPhotosView.vue'
 import BrainTrainerView from '../views/brain-trainer/BrainTrainerView.vue'
+import ContactsView from '../views/contacts/ContactsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -75,6 +76,12 @@ const router = createRouter({
       path: '/brain-trainer',
       name: 'brain-trainer',
       component: BrainTrainerView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/contacts',
+      name: 'contacts',
+      component: ContactsView,
       meta: { requiresAuth: true }
     },
     {

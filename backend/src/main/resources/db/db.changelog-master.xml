@@ -30,4 +30,9 @@
 
     <include file="db/changelog/20260308174400_create_exercise_stats.xml"/>
 
+    <include file="db/changelog/20260308205200_create_trusted_contacts.xml"/>
+    <include file="db/changelog/20260308205300_create_messages.xml"/>
+    <include file="db/changelog/20260308205400_create_message_templates.xml"/>
+    <include file="db/changelog/20260308212600_alter_message_templates_user_id_nullable.xml"/>
+
 </databaseChangeLog>

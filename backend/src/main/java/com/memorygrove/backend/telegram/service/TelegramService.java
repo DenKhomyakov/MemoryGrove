@@ -56,6 +56,71 @@ public class TelegramService {
     }
 
     /**
+     * Отправляет уведомление о новом сообщении от доверенного контакта
+     *
+     * @param userId ID пользователя-получателя
+     * @param senderName имя отправителя
+     * @param messageText текст сообщения
+     * @return true если сообщение отправлено успешно
+     */
+    @Transactional(readOnly = true)
+    public boolean sendMessageNotification(UUID userId, String senderName, String messageText) {
+        log.debug("Отправка уведомления о новом сообщении пользователю {}", userId);
+
+        TelegramBinding binding = bindingRepository.findByUserId(userId)
+                .orElse(null);
+
+        if (binding == null || !binding.isNotificationsEnabled()) {
+            log.debug("Пользователь {} не привязал Telegram или отключил уведомления", userId);
+            return false;
+        }
+
+        // Обрезаем длинное сообщение для уведомления
+        String preview = messageText.length() > 100
+                ? messageText.substring(0, 97) + "..."
+                : messageText;
+
+        String message = String.format(
+                "💬 *Новое сообщение от %s*\n\n" +
+                        "_%s_\n\n" +
+                        "🔗 Перейдите в приложение, чтобы ответить",
+                senderName,
+                preview
+        );
+
+        memoryGroveBot.sendMessage(binding.getChatId(), message);
+        log.info("✅ Уведомление о сообщении отправлено пользователю {}", userId);
+        return true;
+    }
+
+    /**
+     * Отправляет уведомление о непрочитанных сообщениях (ежедневный дайджест)
+     *
+     * @param userId ID пользователя
+     * @param unreadCount количество непрочитанных сообщений
+     * @return true если сообщение отправлено успешно
+     */
+    @Transactional(readOnly = true)
+    public boolean sendUnreadSummary(UUID userId, long unreadCount) {
+        TelegramBinding binding = bindingRepository.findByUserId(userId)
+                .orElse(null);
+
+        if (binding == null || !binding.isNotificationsEnabled()) {
+            return false;
+        }
+
+        String message = String.format(
+                "📬 *У вас %s непрочитанных %s*\n\n" +
+                        "🔗 Перейдите в приложение, чтобы прочитать",
+                unreadCount,
+                getMessageWord(unreadCount)
+        );
+
+        memoryGroveBot.sendMessage(binding.getChatId(), message);
+        return true;
+    }
+
+    /**
      * Отправляет приветственное сообщение после привязки
      *
      * @param userId ID пользователя в системе
@@ -71,7 +136,7 @@ public class TelegramService {
         }
 
         String message = "🎉 *Добро пожаловать в семью MemoryGrove!*\n\n" +
-                "Теперь вы будете получать уведомления о напоминаниях. " +
+                "Теперь вы будете получать уведомления о напоминаниях и новых сообщениях. " +
                 "Если захотите отключить уведомления, это можно сделать в профиле на сайте.";
 
         memoryGroveBot.sendMessage(binding.getChatId(), message);
@@ -89,5 +154,21 @@ public class TelegramService {
         return bindingRepository.findByUserId(userId)
                 .map(TelegramBinding::isNotificationsEnabled)
                 .orElse(false);
+    }
+
+    /**
+     * Вспомогательный метод для склонения слова "сообщение"
+     *
+     * @param count количество
+     * @return правильная форма слова
+     */
+    private String getMessageWord(long count) {
+        if (count % 10 == 1 && count % 100 != 11) {
+            return "сообщение";
+        } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+            return "сообщения";
+        } else {
+            return "сообщений";
+        }
     }
 }

@@ -57,13 +57,13 @@
           <div class="module-status available">Доступно</div>
         </router-link>
 
-        <!-- Карточка "Восстановление связей" (скоро) -->
-        <div class="module-card">
+        <!-- Карточка "Восстановление связей" -->
+        <router-link to="/contacts" class="module-card">
           <div class="module-icon">🤝</div>
           <h3>Восстановление связей</h3>
           <p>Контакты доверия, общение с близкими</p>
-          <div class="module-status">Скоро</div>
-        </div>
+          <div class="module-status available">Доступно</div>
+        </router-link>
 
         <!-- Карточка "Цифровая память" -->
         <router-link to="/memory/photos" class="module-card">

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260308205200" author="KhomyakovDA">
+
+        <comment>Создание таблицы trusted_contacts для хранения доверенных контактов пользователя</comment>
+
+        <createTable tableName="trusted_contacts" remarks="Доверенные контакты пользователя">
+
+            <column name="id" type="UUID" remarks="Уникальный идентификатор записи">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя (владелец контакта)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="contact_id" type="UUID" remarks="ID доверенного контакта">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="nickname" type="VARCHAR(100)" remarks="Как пользователь называет этот контакт (например, 'Сын Петя')">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="added_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата добавления контакта">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true" remarks="Активен ли контакт (можно временно заблокировать общение)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="can_send_messages" type="BOOLEAN" defaultValueBoolean="true" remarks="Может ли контакт отправлять сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="can_receive_notifications" type="BOOLEAN" defaultValueBoolean="true" remarks="Получать ли уведомления от этого контакта">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешние ключи к users -->
+        <addForeignKeyConstraint
+                baseTableName="trusted_contacts"
+                baseColumnNames="user_id"
+                constraintName="fk_trusted_contacts_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="trusted_contacts"
+                baseColumnNames="contact_id"
+                constraintName="fk_trusted_contacts_contact"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Уникальное ограничение: один пользователь не может добавить один и тот же контакт дважды -->
+        <addUniqueConstraint
+                tableName="trusted_contacts"
+                columnNames="user_id, contact_id"
+                constraintName="uk_trusted_contacts_user_contact"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="trusted_contacts" indexName="idx_trusted_contacts_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="trusted_contacts" indexName="idx_trusted_contacts_contact_id">
+            <column name="contact_id"/>
+        </createIndex>
+
+        <createIndex tableName="trusted_contacts" indexName="idx_trusted_contacts_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="trusted_contacts"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
