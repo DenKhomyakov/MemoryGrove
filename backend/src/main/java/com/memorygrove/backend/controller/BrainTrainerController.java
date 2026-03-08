@@ -210,6 +210,32 @@ public class BrainTrainerController {
     }
 
     /**
+     * Отправляет результаты таблицы Шульте
+     *
+     * @param requestDto DTO с результатами
+     * @return пустой ответ с HTTP статусом 200 OK
+     */
+    @Operation(
+            summary = "Отправить результаты таблицы Шульте",
+            description = "Принимает результаты упражнения и обновляет статистику"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Результаты обработаны"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
+    @PostMapping("/schulte/result")
+    public ResponseEntity<Void> submitSchulteResult(
+            @Valid @RequestBody SchulteResultRequestDto requestDto
+    ) {
+        UUID userId = getCurrentUserId();
+        log.info("Получение результатов таблицы Шульте от пользователя {}", userId);
+
+        brainTrainerService.processSchulteResult(userId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * Получает всю статистику пользователя по упражнениям
      *
      * @return список статистики по каждому упражнению

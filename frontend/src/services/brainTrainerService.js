@@ -99,6 +99,21 @@ class BrainTrainerService {
   }
 
   /**
+   * Отправить результаты таблицы Шульте
+   * @param {Object} data - { size, timeSeconds, isSuccess }
+   * @returns {Promise<void>}
+   */
+  async submitSchulteResult(data) {
+    try {
+      await apiClient.post('/brain/schulte/result', data)
+      console.log('✅ Результаты таблицы Шульте отправлены:', data)
+    } catch (error) {
+      console.error('❌ Ошибка отправки результатов:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
    * Получить всю статистику по упражнениям
    * @returns {Promise<Array>} массив со статистикой по каждому упражнению
    */

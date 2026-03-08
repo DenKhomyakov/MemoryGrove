@@ -184,6 +184,23 @@ public class BrainTrainerService {
     }
 
     /**
+     * Обрабатывает результат таблицы Шульте и обновляет статистику
+     *
+     * @param userId ID пользователя
+     * @param requestDto DTO с результатами
+     */
+    public void processSchulteResult(UUID userId, SchulteResultRequestDto requestDto) {
+        log.info("Обработка результатов таблицы Шульте для пользователя {}", userId);
+
+        // Обновляем статистику
+        updateStats(userId, ExerciseType.SCHULTE_TABLE, requestDto.getIsSuccess(),
+                requestDto.getSize(), requestDto.getTimeSeconds());
+
+        log.info("✅ Результаты обработаны. Успешно: {}, размер: {}, время: {} сек",
+                requestDto.getIsSuccess(), requestDto.getSize(), requestDto.getTimeSeconds());
+    }
+
+    /**
      * Получает статистику пользователя по всем упражнениям
      *
      * @param userId ID пользователя

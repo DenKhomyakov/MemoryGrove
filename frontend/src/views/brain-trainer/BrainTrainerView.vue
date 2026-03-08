@@ -43,7 +43,7 @@
         <!-- Арифметическая цепочка -->
         <ExerciseCard
           type="ARITHMETIC"
-          title="🧮 Арифметическая цепочка"
+          title="Арифметическая цепочка"
           description="Решайте последовательность примеров и тренируйте устный счёт"
           :stats="getStatsForType('ARITHMETIC')"
           @click="openGame('arithmetic')"
@@ -52,7 +52,7 @@
         <!-- Понимание текста -->
         <ExerciseCard
           type="TEXT_COMPREHENSION"
-          title="📖 Понимание текста"
+          title="Понимание текста"
           description="Читайте рассказы и отвечайте на вопросы по содержанию"
           :stats="getStatsForType('TEXT_COMPREHENSION')"
           @click="openGame('text')"
@@ -61,7 +61,7 @@
         <!-- Заучивание стихов -->
         <ExerciseCard
           type="POEM"
-          title="📝 Заучивание стихов"
+          title="Заучивание стихов"
           description="Запоминайте четверостишия и воспроизводите их по памяти"
           :stats="getStatsForType('POEM')"
           @click="openGame('poem')"
@@ -70,7 +70,7 @@
         <!-- Ассоциации -->
         <ExerciseCard
           type="ASSOCIATION"
-          title="🔗 Ассоциации"
+          title="Ассоциации"
           description="Подбирайте ассоциации к словам из предложенных вариантов"
           :stats="getStatsForType('ASSOCIATION')"
           @click="openGame('association')"
@@ -79,10 +79,19 @@
         <!-- Продолжи ряд -->
         <ExerciseCard
           type="SEQUENCE"
-          title="📊 Продолжи ряд"
+          title="Продолжи ряд"
           description="Находите закономерности в числах, буквах и символах"
           :stats="getStatsForType('SEQUENCE')"
           @click="openGame('sequence')"
+        />
+
+        <!-- Таблица Шульте -->
+        <ExerciseCard
+          type="SCHULTE_TABLE"
+          title="Таблица Шульте"
+          description="Находите цифры по порядку и тренируйте внимание"
+          :stats="getStatsForType('SCHULTE_TABLE')"
+          @click="openGame('schulte')"
         />
       </div>
     </div>
@@ -108,6 +117,10 @@
       <Sequence @back="closeGame" />
     </div>
 
+    <div v-if="activeGame === 'schulte'" class="game-container">
+      <SchulteTable @back="closeGame" />
+    </div>
+
     <!-- Уведомления -->
     <Notification
       v-if="showNotification"
@@ -130,6 +143,7 @@ import TextComprehension from './games/TextComprehension.vue'
 import PoemMemorization from './games/PoemMemorization.vue'
 import Associations from './games/Associations.vue'
 import Sequence from './games/Sequence.vue'
+import SchulteTable from './games/SchulteTable.vue'
 import brainTrainerService from '@/services/brainTrainerService'
 
 const router = useRouter()
