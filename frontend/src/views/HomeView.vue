@@ -65,13 +65,12 @@
           <div class="module-status">Скоро</div>
         </div>
 
-        <!-- Карточка "Цифровая память" (скоро) -->
-        <div class="module-card">
+        <router-link to="/memory/photos" class="module-card">
           <div class="module-icon">📸</div>
           <h3>Цифровая память</h3>
-          <p>Фотографии, значимые места, любимые фильмы и книги</p>
-          <div class="module-status">Скоро</div>
-        </div>
+          <p>Фотографии, значимые места, коллекция интересов</p>
+          <div class="module-status available">Доступно</div>
+        </router-link>
 
         <!-- Карточка "Психологическая помощь" -->
         <router-link to="/help" class="module-card help-card">

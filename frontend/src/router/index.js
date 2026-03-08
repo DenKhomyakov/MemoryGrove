@@ -11,6 +11,7 @@ import RemindersView from '../views/reminders/RemindersView.vue'
 import PlacesView from '../views/places/PlacesView.vue'
 import InterestsView from '../views/interests/InterestsView.vue'
 import SkillsView from '../views/skills/SkillsView.vue'
+import MemoryPhotosView from '../views/memory/MemoryPhotosView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,6 +62,12 @@ const router = createRouter({
       path: '/skills',
       name: 'skills',
       component: SkillsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/memory/photos',
+      name: 'memory-photos',
+      component: MemoryPhotosView,
       meta: { requiresAuth: true }
     },
     {
