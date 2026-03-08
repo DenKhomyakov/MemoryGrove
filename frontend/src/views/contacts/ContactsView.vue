@@ -23,7 +23,7 @@
     </div>
 
     <!-- Статистика -->
-    <div v-if="stats" class="stats-section">
+    <div v-if="stats.totalContacts > 0" class="stats-section">
       <div class="stat-card">
         <span class="stat-value">{{ stats.totalContacts }}</span>
         <span class="stat-label">Всего контактов</span>
@@ -151,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
@@ -474,7 +474,7 @@ onMounted(() => {
   padding: 1rem;
   background-color: var(--color-white, #ffffff);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.05));
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0,0,0,0.05));
 }
 
 .search-box {

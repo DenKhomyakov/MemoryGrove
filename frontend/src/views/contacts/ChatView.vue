@@ -100,7 +100,7 @@
         @keyup.enter.exact.prevent="sendMessage"
         @keyup.enter.shift.exact="addNewLine"
         :disabled="sending"
-        rows="1"
+        :rows="1"
         class="message-input"
       />
       <Button
