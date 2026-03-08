@@ -66,16 +66,25 @@
           :stats="getStatsForType('POEM')"
           @click="openGame('poem')"
         />
-      </div>
 
-      <!-- Ассоциации -->
-      <ExerciseCard
-        type="ASSOCIATION"
-        title="🔗 Ассоциации"
-        description="Подбирайте ассоциации к словам из предложенных вариантов"
-        :stats="getStatsForType('ASSOCIATION')"
-        @click="openGame('association')"
-      />
+        <!-- Ассоциации -->
+        <ExerciseCard
+          type="ASSOCIATION"
+          title="🔗 Ассоциации"
+          description="Подбирайте ассоциации к словам из предложенных вариантов"
+          :stats="getStatsForType('ASSOCIATION')"
+          @click="openGame('association')"
+        />
+
+        <!-- Продолжи ряд -->
+        <ExerciseCard
+          type="SEQUENCE"
+          title="📊 Продолжи ряд"
+          description="Находите закономерности в числах, буквах и символах"
+          :stats="getStatsForType('SEQUENCE')"
+          @click="openGame('sequence')"
+        />
+      </div>
     </div>
 
     <!-- Компоненты игр -->
@@ -93,6 +102,10 @@
 
     <div v-if="activeGame === 'association'" class="game-container">
       <Associations @back="closeGame" />
+    </div>
+
+    <div v-if="activeGame === 'sequence'" class="game-container">
+      <Sequence @back="closeGame" />
     </div>
 
     <!-- Уведомления -->
@@ -116,6 +129,7 @@ import ArithmeticChain from './games/ArithmeticChain.vue'
 import TextComprehension from './games/TextComprehension.vue'
 import PoemMemorization from './games/PoemMemorization.vue'
 import Associations from './games/Associations.vue'
+import Sequence from './games/Sequence.vue'
 import brainTrainerService from '@/services/brainTrainerService'
 
 const router = useRouter()

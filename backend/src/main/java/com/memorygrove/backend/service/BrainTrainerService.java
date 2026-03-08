@@ -3,10 +3,7 @@ package com.memorygrove.backend.service;
 import com.memorygrove.backend.dictionary.ExerciseType;
 import com.memorygrove.backend.entity.dbo.ExerciseStats;
 import com.memorygrove.backend.entity.dbo.User;
-import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.AssociationResultRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.PoemResultRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.*;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
 import com.memorygrove.backend.repository.ExerciseStatsRepository;
@@ -160,6 +157,26 @@ public class BrainTrainerService {
 
         // Обновляем статистику
         updateStats(userId, ExerciseType.ASSOCIATION, isSuccess,
+                requestDto.getCorrect(), requestDto.getTimeSeconds());
+
+        log.info("✅ Результаты обработаны. Успешно: {}, правильных: {} из {}, время: {} сек",
+                isSuccess, requestDto.getCorrect(), requestDto.getTotal(), requestDto.getTimeSeconds());
+    }
+
+    /**
+     * Обрабатывает результат последовательности и обновляет статистику
+     *
+     * @param userId ID пользователя
+     * @param requestDto DTO с результатами
+     */
+    public void processSequenceResult(UUID userId, SequenceResultRequestDto requestDto) {
+        log.info("Обработка результатов последовательности для пользователя {}", userId);
+
+        // Считаем упражнение успешным при 70% и выше
+        boolean isSuccess = requestDto.getPercentage() >= 70;
+
+        // Обновляем статистику
+        updateStats(userId, ExerciseType.SEQUENCE, isSuccess,
                 requestDto.getCorrect(), requestDto.getTimeSeconds());
 
         log.info("✅ Результаты обработаны. Успешно: {}, правильных: {} из {}, время: {} сек",

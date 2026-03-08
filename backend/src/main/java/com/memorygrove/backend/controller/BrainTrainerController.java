@@ -1,10 +1,7 @@
 package com.memorygrove.backend.controller;
 
 import com.memorygrove.backend.dictionary.ExerciseType;
-import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.AssociationResultRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.PoemResultRequestDto;
-import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.*;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
 import com.memorygrove.backend.service.BrainTrainerService;
@@ -183,6 +180,32 @@ public class BrainTrainerController {
         log.info("Получение результатов ассоциаций от пользователя {}", userId);
 
         brainTrainerService.processAssociationResult(userId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Отправляет результаты последовательности
+     *
+     * @param requestDto DTO с результатами
+     * @return пустой ответ с HTTP статусом 200 OK
+     */
+    @Operation(
+            summary = "Отправить результаты последовательности",
+            description = "Принимает результаты упражнения и обновляет статистику"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Результаты обработаны"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
+    @PostMapping("/sequence/result")
+    public ResponseEntity<Void> submitSequenceResult(
+            @Valid @RequestBody SequenceResultRequestDto requestDto
+    ) {
+        UUID userId = getCurrentUserId();
+        log.info("Получение результатов последовательности от пользователя {}", userId);
+
+        brainTrainerService.processSequenceResult(userId, requestDto);
         return ResponseEntity.ok().build();
     }
 

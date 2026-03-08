@@ -84,6 +84,21 @@ class BrainTrainerService {
   }
 
   /**
+   * Отправить результаты последовательности
+   * @param {Object} data - { correct, total, percentage, timeSeconds, difficulty }
+   * @returns {Promise<void>}
+   */
+  async submitSequenceResult(data) {
+    try {
+      await apiClient.post('/brain/sequence/result', data)
+      console.log('✅ Результаты последовательности отправлены:', data)
+    } catch (error) {
+      console.error('❌ Ошибка отправки результатов:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
    * Получить всю статистику по упражнениям
    * @returns {Promise<Array>} массив со статистикой по каждому упражнению
    */
