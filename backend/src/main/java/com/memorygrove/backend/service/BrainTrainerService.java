@@ -4,6 +4,7 @@ import com.memorygrove.backend.dictionary.ExerciseType;
 import com.memorygrove.backend.entity.dbo.ExerciseStats;
 import com.memorygrove.backend.entity.dbo.User;
 import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
 import com.memorygrove.backend.repository.ExerciseStatsRepository;
@@ -25,7 +26,8 @@ import java.util.stream.Collectors;
  * Предоставляет функционал для:
  * <ul>
  *   <li>Генерации арифметических цепочек</li>
- *   <li>Проверки ответов</li>
+ *   <li>Проверки ответов на арифметические цепочки</li>
+ *   <li>Обработки результатов понимания текста</li>
  *   <li>Ведения статистики по упражнениям</li>
  * </ul>
  * </p>
@@ -100,6 +102,26 @@ public class BrainTrainerService {
                 requestDto.getResult(), correctResult);
 
         return isCorrect;
+    }
+
+    /**
+     * Обрабатывает результат упражнения "Понимание текста" и обновляет статистику
+     *
+     * @param userId ID пользователя
+     * @param requestDto DTO с результатами понимания текста
+     */
+    public void processTextComprehensionResult(UUID userId, TextComprehensionRequestDto requestDto) {
+        log.info("Обработка результатов понимания текста для пользователя {}", userId);
+
+        // Считаем упражнение успешным, если пользователь ответил правильно на 70% и более вопросов
+        boolean isSuccess = requestDto.getSuccessRate() >= 70;
+
+        // Обновляем статистику
+        updateStats(userId, ExerciseType.TEXT_COMPREHENSION, isSuccess,
+                requestDto.getCorrectAnswers(), requestDto.getTimeSeconds());
+
+        log.info("✅ Результаты обработаны. Успешно: {}, правильных ответов: {} из {}, время: {} сек",
+                isSuccess, requestDto.getCorrectAnswers(), requestDto.getTotalQuestions(), requestDto.getTimeSeconds());
     }
 
     /**

@@ -39,6 +39,21 @@ class BrainTrainerService {
   }
 
   /**
+   * Отправить результаты понимания текста
+   * @param {Object} data - { correctAnswers, totalQuestions, successRate, timeSeconds }
+   * @returns {Promise<void>}
+   */
+  async submitTextComprehensionResult(data) {
+    try {
+      await apiClient.post('/brain/text-comprehension/result', data)
+      console.log('✅ Результаты понимания текста отправлены:', data)
+    } catch (error) {
+      console.error('❌ Ошибка отправки результатов:', error.response?.data || error.message)
+      throw error
+    }
+  }
+
+  /**
    * Получить всю статистику по упражнениям
    * @returns {Promise<Array>} массив со статистикой по каждому упражнению
    */

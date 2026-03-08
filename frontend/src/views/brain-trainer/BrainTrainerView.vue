@@ -49,15 +49,16 @@
           @click="openGame('arithmetic')"
         />
 
-        <!-- Здесь будут остальные упражнения (пока закомментированы) -->
-        <!--
+        <!-- Понимание текста (новая карточка) -->
         <ExerciseCard
           type="TEXT_COMPREHENSION"
           title="📖 Понимание текста"
-          description="Читайте рассказы и отвечайте на вопросы"
+          description="Читайте рассказы и отвечайте на вопросы по содержанию"
           :stats="getStatsForType('TEXT_COMPREHENSION')"
           @click="openGame('text')"
         />
+
+        <!--
         <ExerciseCard
           type="POEM"
           title="📝 Заучивание стихов"
@@ -69,9 +70,13 @@
       </div>
     </div>
 
-    <!-- Компонент игры (отображается при выборе) -->
+    <!-- Компоненты игр -->
     <div v-if="activeGame === 'arithmetic'" class="game-container">
       <ArithmeticChain @back="closeGame" />
+    </div>
+
+    <div v-if="activeGame === 'text'" class="game-container">
+      <TextComprehension @back="closeGame" />
     </div>
 
     <!-- Уведомления -->
@@ -92,6 +97,7 @@ import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
 import ExerciseCard from './components/ExerciseCard.vue'
 import ArithmeticChain from './games/ArithmeticChain.vue'
+import TextComprehension from './games/TextComprehension.vue'
 import brainTrainerService from '@/services/brainTrainerService'
 
 const router = useRouter()

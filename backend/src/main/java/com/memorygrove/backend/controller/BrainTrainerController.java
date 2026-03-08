@@ -2,6 +2,7 @@ package com.memorygrove.backend.controller;
 
 import com.memorygrove.backend.dictionary.ExerciseType;
 import com.memorygrove.backend.entity.dto.brain.request.ArithmeticChainRequestDto;
+import com.memorygrove.backend.entity.dto.brain.request.TextComprehensionRequestDto;
 import com.memorygrove.backend.entity.dto.brain.response.ArithmeticChainResponseDto;
 import com.memorygrove.backend.entity.dto.brain.response.ExerciseStatsResponseDto;
 import com.memorygrove.backend.service.BrainTrainerService;
@@ -33,7 +34,8 @@ import java.util.UUID;
  * Предоставляет эндпоинты для:
  * <ul>
  *   <li>Генерации арифметических цепочек</li>
- *   <li>Проверки ответов</li>
+ *   <li>Проверки ответов на арифметические цепочки</li>
+ *   <li>Отправки результатов понимания текста</li>
  *   <li>Получения статистики по упражнениям</li>
  * </ul>
  * </p>
@@ -102,6 +104,32 @@ public class BrainTrainerController {
 
         boolean isCorrect = brainTrainerService.checkArithmeticAnswer(userId, correctResult, requestDto);
         return ResponseEntity.ok(isCorrect);
+    }
+
+    /**
+     * Отправляет результаты упражнения "Понимание текста"
+     *
+     * @param requestDto DTO с результатами
+     * @return пустой ответ с HTTP статусом 200 OK
+     */
+    @Operation(
+            summary = "Отправить результаты понимания текста",
+            description = "Принимает результаты упражнения и обновляет статистику"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Результаты обработаны"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован")
+    })
+    @PostMapping("/text-comprehension/result")
+    public ResponseEntity<Void> submitTextComprehensionResult(
+            @Valid @RequestBody TextComprehensionRequestDto requestDto
+    ) {
+        UUID userId = getCurrentUserId();
+        log.info("Получение результатов понимания текста от пользователя {}", userId);
+
+        brainTrainerService.processTextComprehensionResult(userId, requestDto);
+        return ResponseEntity.ok().build();
     }
 
     /**
