@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -92,8 +93,8 @@ public class MessageService {
         Message savedMessage = messageRepository.save(message);
         log.info("✅ Сообщение {} успешно отправлено", savedMessage.getId());
 
-        // Асинхронно отправляем в Telegram
-        sendToTelegramAsync(savedMessage);
+        // Временно отключаем отправку в Telegram
+        // sendToTelegramAsync(savedMessage);
 
         return MessageResponseDto.fromEntity(savedMessage, senderId);
     }
@@ -123,10 +124,28 @@ public class MessageService {
 
         Page<Message> messagesPage = messageRepository.findConversation(userId, contactId, pageable);
 
-        // Отмечаем все непрочитанные сообщения как прочитанные
-        markMessagesAsRead(userId, contactId);
+        // Вызываем асинхронно отметку о прочтении, чтобы не блокировать основной запрос
+//        markMessagesAsReadAsync(userId, contactId);
 
         return messagesPage.map(message -> MessageResponseDto.fromEntity(message, userId));
+    }
+
+    /**
+     * Асинхронно отмечает сообщения как прочитанные
+     *
+     * @param userId ID пользователя
+     * @param contactId ID контакта
+     */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void markMessagesAsReadAsync(UUID userId, UUID contactId) {
+        try {
+            log.debug("Асинхронная отметка сообщений от {} как прочитанных пользователем {}", contactId, userId);
+            messageRepository.markMessagesAsRead(userId, contactId, LocalDateTime.now());
+            log.debug("✅ Сообщения отмечены как прочитанные");
+        } catch (Exception e) {
+            log.error("❌ Ошибка при отметке сообщений как прочитанных: {}", e.getMessage());
+        }
     }
 
     /**
@@ -166,9 +185,9 @@ public class MessageService {
      * @param userId ID пользователя
      * @param contactId ID контакта
      */
+    @Transactional
     public void markMessagesAsRead(UUID userId, UUID contactId) {
         log.debug("Отметка сообщений от {} как прочитанных пользователем {}", contactId, userId);
-
         messageRepository.markMessagesAsRead(userId, contactId, LocalDateTime.now());
     }
 
@@ -214,6 +233,7 @@ public class MessageService {
         try {
             log.debug("Асинхронная отправка сообщения {} в Telegram", message.getId());
 
+            // Проверяем, привязан ли Telegram
             boolean sent = telegramService.sendMessageNotification(
                     message.getReceiver().getId(),
                     message.getSender().getFullName(),
@@ -224,10 +244,13 @@ public class MessageService {
                 message.markAsDelivered();
                 messageRepository.save(message);
                 log.debug("✅ Сообщение {} доставлено в Telegram", message.getId());
+            } else {
+                log.debug("ℹ️ Сообщение {} не доставлено в Telegram (пользователь не привязан или отключил уведомления)", message.getId());
             }
         } catch (Exception e) {
             log.error("❌ Ошибка при отправке сообщения {} в Telegram: {}",
                     message.getId(), e.getMessage());
+            // НЕ выбрасываем исключение, чтобы не откатывать транзакцию
         }
     }
 

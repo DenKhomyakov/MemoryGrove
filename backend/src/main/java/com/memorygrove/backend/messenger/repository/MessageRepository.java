@@ -4,6 +4,7 @@ import com.memorygrove.backend.messenger.entity.dbo.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -78,6 +79,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
      * @param contactId ID контакта
      * @param readTime время прочтения
      */
+    @Modifying
     @Query("UPDATE Message m SET m.readAt = :readTime " +
             "WHERE m.receiver.id = :userId AND m.sender.id = :contactId AND m.readAt IS NULL")
     void markMessagesAsRead(@Param("userId") UUID userId,
