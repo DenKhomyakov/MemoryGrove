@@ -24,6 +24,13 @@
         </button>
         <button
           class="tab-button"
+          :class="{ active: activeTab === 'id' }"
+          @click="switchToIdTab"
+        >
+          Мой ID
+        </button>
+        <button
+          class="tab-button"
           :class="{ active: activeTab === 'telegram' }"
           @click="switchToTelegramTab"
         >
@@ -270,6 +277,46 @@
         </form>
       </div>
 
+      <!-- Вкладка с ID пользователя -->
+      <div v-else-if="activeTab === 'id'" class="tab-content">
+        <div class="id-card">
+          <div class="id-icon">🆔</div>
+          <h3>Ваш уникальный идентификатор</h3>
+          <p class="id-description">
+            Этот ID нужен, чтобы другие пользователи могли добавить вас в контакты.
+            Поделитесь им с теми, кому доверяете.
+          </p>
+
+          <div class="id-display">
+            <div class="id-box">
+              <span class="id-value">{{ userData?.id || '—' }}</span>
+              <button
+                class="copy-button"
+                @click="copyUserId"
+                :title="copySuccess ? 'Скопировано!' : 'Копировать ID'"
+              >
+                <span v-if="!copySuccess">📋</span>
+                <span v-else class="copy-success">✓</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="id-actions">
+            <Button
+              variant="primary"
+              @click="copyUserId"
+            >
+              {{ copySuccess ? 'Скопировано!' : 'Копировать ID' }}
+            </Button>
+          </div>
+
+          <div class="id-note">
+            <p>💡 Отправляйте этот ID только доверенным людям.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Вкладка Telegram -->
       <div v-else-if="activeTab === 'telegram'" class="tab-content">
         <TelegramBinding />
       </div>
@@ -376,6 +423,7 @@ const loading = ref(true)
 const updatingProfile = ref(false)
 const updatingPassword = ref(false)
 const deactivating = ref(false)
+const copySuccess = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
@@ -436,6 +484,24 @@ const showNotificationMessage = (type, message) => {
   showNotification.value = true
 }
 
+// Копирование ID в буфер обмена
+const copyUserId = async () => {
+  if (!userData.value?.id) return
+
+  try {
+    await navigator.clipboard.writeText(userData.value.id)
+    copySuccess.value = true
+    showNotificationMessage('success', 'ID скопирован в буфер обмена!')
+
+    setTimeout(() => {
+      copySuccess.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('❌ Ошибка копирования:', err)
+    showNotificationMessage('error', 'Не удалось скопировать ID')
+  }
+}
+
 // Форматирование даты (для даты рождения)
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -486,6 +552,13 @@ const switchToPasswordTab = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmNewPassword = ''
+}
+
+// Переключение на вкладку ID
+const switchToIdTab = () => {
+  activeTab.value = 'id'
+  isEditing.value = false
+  copySuccess.value = false
 }
 
 // Переключение на вкладку Telegram
@@ -814,7 +887,7 @@ onMounted(() => {
   background: var(--color-white, #ffffff);
   border-radius: 16px;
   padding: 2.5rem;
-  box-shadow: 0 4px 20px var(--shadow-color, rgba(0,0,0,0.1));
+  box-shadow: 0 4px 20px var(--shadow-color, rgba(0, 0, 0, 0.1));
 }
 
 .profile-header {
@@ -934,6 +1007,96 @@ onMounted(() => {
   margin-top: 2rem;
 }
 
+/* Стили для ID карточки (НОВЫЕ) */
+.id-card {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--color-white-smoke, #f5f5f5);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.id-icon {
+  font-size: 48px;
+  margin-bottom: 1rem;
+}
+
+.id-card h3 {
+  color: var(--color-primary-dark, #6aa91c);
+  font-size: 20px;
+  margin-bottom: 1rem;
+}
+
+.id-description {
+  color: var(--color-gray, #9e9e9e);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.id-display {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.id-box {
+  background: var(--color-white, #ffffff);
+  border: 2px solid var(--color-primary, #88d424);
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: monospace;
+  font-size: 18px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.id-value {
+  color: var(--color-dark-gray, #616161);
+  word-break: break-word;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-button:hover {
+  background-color: rgba(136, 212, 36, 0.1);
+}
+
+.copy-success {
+  color: var(--color-success, #4caf50);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.id-actions {
+  margin-bottom: 1.5rem;
+}
+
+.id-note {
+  color: var(--color-gray, #9e9e9e);
+  font-size: 13px;
+  font-style: italic;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-light-gray, #e0e0e0);
+}
+
 /* Стили для предупреждения */
 .deactivate-warning {
   background-color: rgba(244, 67, 54, 0.1);
@@ -1050,6 +1213,15 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+  }
+
+  .id-box {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .id-value {
+    font-size: 14px;
   }
 }
 </style>
