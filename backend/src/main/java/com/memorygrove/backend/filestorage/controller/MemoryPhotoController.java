@@ -6,6 +6,7 @@ import com.memorygrove.backend.filestorage.entity.dto.request.PhotoUploadRequest
 import com.memorygrove.backend.filestorage.entity.dto.response.PhotoListResponseDto;
 import com.memorygrove.backend.filestorage.entity.dto.response.PhotoResponseDto;
 import com.memorygrove.backend.filestorage.exception.FileSizeLimitExceededException;
+import com.memorygrove.backend.filestorage.exception.FileStorageException;
 import com.memorygrove.backend.filestorage.exception.InvalidFileTypeException;
 import com.memorygrove.backend.filestorage.service.MemoryPhotoService;
 import com.memorygrove.backend.util.JwtUtil;
@@ -15,12 +16,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -261,11 +264,22 @@ public class MemoryPhotoController {
         UUID userId = getCurrentUserId();
         log.info("Запрос миниатюры фотографии {} от пользователя {}", photoId, userId);
 
-        Resource resource = photoService.getThumbnail(photoId, userId);
+        try {
+            Resource resource = photoService.getThumbnail(photoId, userId);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (EntityNotFoundException e) {
+            log.error("❌ Фотография не найдена: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (FileStorageException e) {
+            log.error("❌ Ошибка при загрузке миниатюры: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            log.error("❌ Неожиданная ошибка: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**

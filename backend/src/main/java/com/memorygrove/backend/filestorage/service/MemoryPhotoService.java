@@ -5,6 +5,7 @@ import com.memorygrove.backend.filestorage.entity.dto.request.PhotoUpdateMetadat
 import com.memorygrove.backend.filestorage.entity.dto.request.PhotoUploadRequestDto;
 import com.memorygrove.backend.filestorage.entity.dto.response.PhotoListResponseDto;
 import com.memorygrove.backend.filestorage.entity.dto.response.PhotoResponseDto;
+import com.memorygrove.backend.filestorage.exception.FileStorageException;
 import com.memorygrove.backend.filestorage.repository.MemoryPhotoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -198,7 +199,7 @@ public class MemoryPhotoService {
     }
 
     /**
-     * Получает миниатюру фотографии.
+     * Получает миниатюру фотографии
      *
      * @param photoId ID фотографии
      * @param userId  ID пользователя
@@ -211,7 +212,43 @@ public class MemoryPhotoService {
         MemoryPhoto photo = findPhotoByIdAndUserId(photoId, userId);
 
         if (photo.getThumbnailPath() == null) {
+            log.error("❌ Миниатюра для фотографии {} не найдена в БД", photoId);
             throw new EntityNotFoundException("Миниатюра для данной фотографии не найдена");
+        }
+
+        // Проверяем существование файла перед загрузкой
+        if (!fileStorageService.fileExists(photo.getThumbnailPath())) {
+            log.error("❌ Файл миниатюры не существует на диске: {}", photo.getThumbnailPath());
+
+            // Пробуем создать миниатюру заново
+            try {
+                log.info("🔄 Попытка пересоздать миниатюру для фотографии {}", photoId);
+                String newThumbnailPath = fileStorageService.createThumbnail(photo.getStoragePath());
+
+                if (newThumbnailPath != null) {
+                    photo.setThumbnailPath(newThumbnailPath);
+                    MemoryPhoto updatedPhoto = photoRepository.save(photo);
+                    log.info("✅ Миниатюра пересоздана: {}", newThumbnailPath);
+
+                    // Даем файловой системе время на синхронизацию
+                    Thread.sleep(100);
+
+                    // Проверяем существование файла после создания
+                    if (fileStorageService.fileExists(newThumbnailPath)) {
+                        log.info("✅ Файл миниатюры подтверждён на диске");
+                        return fileStorageService.loadFileAsResource(newThumbnailPath);
+                    } else {
+                        log.error("❌ Файл миниатюры не найден сразу после создания");
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("❌ Прервано ожидание создания миниатюры: {}", e.getMessage());
+            } catch (Exception e) {
+                log.error("❌ Не удалось пересоздать миниатюру: {}", e.getMessage());
+            }
+
+            throw new FileStorageException("Файл миниатюры не найден: " + photo.getThumbnailPath());
         }
 
         return fileStorageService.loadFileAsResource(photo.getThumbnailPath());
