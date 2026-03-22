@@ -62,7 +62,8 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/webjars/**",
-                                "/swagger-resources/**"
+                                "/swagger-resources/**",
+                                "/error"
                         ).permitAll()
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")

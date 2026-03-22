@@ -1,6 +1,7 @@
 package com.memorygrove.backend.filestorage.service;
 
 import com.memorygrove.backend.filestorage.config.FileStorageProperties;
+import com.memorygrove.backend.filestorage.exception.FileNotFoundException;
 import com.memorygrove.backend.filestorage.exception.FileStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -183,47 +184,57 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public String createThumbnail(String originalPath) {
         try {
-            Path original = Paths.get(originalPath);
-            String fileName = original.getFileName().toString();
-            String thumbnailName = "thumb_" + fileName;
+            // Превращаем входящую строку в полный абсолютный путь
+            // Если originalPath уже содержит "uploads/", то Paths.get его подхватит, normalize() уберет лишние "." и ".."
+            Path sourcePath = Paths.get(originalPath).toAbsolutePath().normalize();
 
-            // Извлекаем части пути из оригинального файла
-            // Путь: uploads/{userId}/{year}/{month}/{fileName}
-            Path parentPath = original.getParent();
-            String userId = parentPath.getParent().getParent().getFileName().toString();
-            String year = parentPath.getParent().getFileName().toString();
-            String month = parentPath.getFileName().toString();
-
-            log.debug("Создание миниатюры для файла: userId={}, year={}, month={}, fileName={}",
-                    userId, year, month, fileName);
-
-            Path thumbnailPath = Paths.get(fileStorageProperties.getThumbnailDir())
-                    .resolve(userId)
-                    .resolve(year)
-                    .resolve(month)
-                    .resolve(thumbnailName);
-
-            Files.createDirectories(thumbnailPath.getParent());
-
-            // Создаём миниатюру
-            Thumbnails.of(original.toFile())
-                    .size(fileStorageProperties.getThumbnailSize(), fileStorageProperties.getThumbnailSize())
-                    .outputFormat("jpg")
-                    .toFile(thumbnailPath.toFile());
-
-            log.info("✅ Миниатюра создана: {}", thumbnailPath.toString());
-
-            if (Files.exists(thumbnailPath)) {
-                log.info("✅ Миниатюра успешно создана");
-            } else {
-                log.error("❌ Миниатюра не создана после операции!");
+            if (!Files.exists(sourcePath)) {
+                // Если вдруг путь пришел без префикса uploads, попробуем склеить с конфигом (фикс баги)
+                sourcePath = Paths.get(fileStorageProperties.getUploadDir())
+                        .resolve(originalPath)
+                        .toAbsolutePath()
+                        .normalize();
             }
 
-            return thumbnailPath.toString().replace('\\', '/');
+            log.debug("Попытка создать миниатюру для файла: {}", sourcePath);
+
+            if (!Files.exists(sourcePath)) {
+                throw new FileNotFoundException("Исходный файл не найден: " + sourcePath);
+            }
+
+            // Определяем структуру папок (userId/year/month)
+            Path uploadRoot = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
+            Path relativePath = uploadRoot.relativize(sourcePath); // Это userId/year/month/file.jpg
+
+            Path subFolders = relativePath.getParent(); // userId/year/month
+
+            // Формируем путь к папке миниатюр
+            Path thumbnailDir = Paths.get(fileStorageProperties.getThumbnailDir())
+                    .resolve(subFolders)
+                    .toAbsolutePath()
+                    .normalize();
+
+            if (!Files.exists(thumbnailDir)) {
+                Files.createDirectories(thumbnailDir);
+            }
+
+            String fileName = sourcePath.getFileName().toString();
+            Path targetPath = thumbnailDir.resolve("thumb_" + fileName);
+
+            // Генерация (используем абсолютные пути через toFile())
+            Thumbnails.of(sourcePath.toFile())
+                    .size(fileStorageProperties.getThumbnailSize(), fileStorageProperties.getThumbnailSize())
+                    .outputFormat("jpg")
+                    .toFile(targetPath.toFile());
+
+            log.info("✅ Миниатюра успешно создана: {}", targetPath);
+
+            // Возвращаем путь для БД
+            return targetPath.toString().replace("\\", "/");
 
         } catch (IOException e) {
-            log.error("❌ Ошибка при создании миниатюры для {}: {}", originalPath, e.getMessage());
-            return null;
+            log.error("❌ Ошибка при создании миниатюры: {}", e.getMessage());
+            throw new FileStorageException("Ошибка при создании миниатюры: " + e.getMessage(), e);
         }
     }
 
