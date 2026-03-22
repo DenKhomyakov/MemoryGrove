@@ -11,6 +11,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -298,5 +301,25 @@ public class MemoryPhotoService {
         }
 
         return photo;
+    }
+
+    /**
+     * Скачивает оригинальный файл фотографии по ID (публичный доступ).
+     * Используется для прямого отображения в img src.
+     */
+    @Transactional(readOnly = true)
+    public ResponseEntity<Resource> downloadPhotoAsResource(UUID photoId) {
+        MemoryPhoto photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Фотография не найдена"));
+
+        Resource resource = fileStorageService.loadFileAsResource(photo.getStoragePath());
+
+        String contentType = photo.getContentType();
+        if (contentType == null) contentType = "image/jpeg";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + photo.getFileName() + "\"")
+                .body(resource);
     }
 }

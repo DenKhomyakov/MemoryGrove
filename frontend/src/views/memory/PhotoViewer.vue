@@ -119,7 +119,7 @@ const props = defineProps({
   },
   currentPhoto: {
     type: Object,
-    required: true
+    default: null
   },
   allPhotos: {
     type: Array,

@@ -208,37 +208,45 @@ public class MemoryPhotoController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Скачивает оригинальный файл фотографии.
-     *
-     * @param photoId UUID фотографии
-     * @return файл для скачивания
-     */
-    @Operation(
-            summary = "Скачать фотографию",
-            description = "Скачивает оригинальный файл фотографии"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Файл отправлен"),
-            @ApiResponse(responseCode = "401", description = "Не авторизован"),
-            @ApiResponse(responseCode = "403", description = "Нет прав на доступ"),
-            @ApiResponse(responseCode = "404", description = "Фотография не найдена")
-    })
-    @GetMapping("/{photoId}/download")
-    public ResponseEntity<Resource> downloadPhoto(
-            @Parameter(description = "UUID фотографии", required = true)
-            @PathVariable UUID photoId) {
-        UUID userId = getCurrentUserId();
-        log.info("Запрос на скачивание фотографии {} от пользователя {}", photoId, userId);
+//    /**
+//     * Скачивает оригинальный файл фотографии.
+//     *
+//     * @param photoId UUID фотографии
+//     * @return файл для скачивания
+//     */
+//    @Operation(
+//            summary = "Скачать фотографию",
+//            description = "Скачивает оригинальный файл фотографии"
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Файл отправлен"),
+//            @ApiResponse(responseCode = "401", description = "Не авторизован"),
+//            @ApiResponse(responseCode = "403", description = "Нет прав на доступ"),
+//            @ApiResponse(responseCode = "404", description = "Фотография не найдена")
+//    })
+//    @GetMapping("/{photoId}/download")
+//    public ResponseEntity<Resource> downloadPhoto(
+//            @Parameter(description = "UUID фотографии", required = true)
+//            @PathVariable UUID photoId) {
+//        UUID userId = getCurrentUserId();
+//        log.info("Запрос на скачивание фотографии {} от пользователя {}", photoId, userId);
+//
+//        Resource resource = photoService.downloadPhoto(photoId, userId);
+//        String contentType = determineContentType(resource);
+//
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.parseMediaType(contentType))
+//                .header(HttpHeaders.CONTENT_DISPOSITION,
+//                        "attachment; filename=\"" + resource.getFilename() + "\"")
+//                .body(resource);
+//    }
 
-        Resource resource = photoService.downloadPhoto(photoId, userId);
-        String contentType = determineContentType(resource);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+    // ToDo: Убрать эту дыру, нужен рефактор на фронте!
+    @Operation(summary = "Скачать фото (публично)", description = "Для использования в тегах img")
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadPhoto(@PathVariable UUID id) {
+        log.info("Запрос на прямое скачивание фото: {}", id);
+        return photoService.downloadPhotoAsResource(id);
     }
 
     /**
