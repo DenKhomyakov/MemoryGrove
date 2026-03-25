@@ -209,7 +209,7 @@ public class MemoryPhotoController {
     }
 
 //    /**
-//     * Скачивает оригинальный файл фотографии.
+//     * Скачивает файл фотографии.
 //     *
 //     * @param photoId UUID фотографии
 //     * @return файл для скачивания
@@ -241,13 +241,30 @@ public class MemoryPhotoController {
 //                .body(resource);
 //    }
 
-    // ToDo: Убрать эту дыру, нужен рефактор на фронте!
-    @Operation(summary = "Скачать фото (публично)", description = "Для использования в тегах img")
+    /**
+     * Скачивает файл фотографии.
+     *
+     * @param id UUID фотографии
+     * @return файл для скачивания
+     */
+    @Operation(summary = "Скачать фото", description = "Для использования в тегах img")
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> downloadPhoto(@PathVariable UUID id) {
         log.info("Запрос на прямое скачивание фото: {}", id);
         return photoService.downloadPhotoAsResource(id);
     }
+
+//    /**
+//     * Получает миниатюру фотографии.
+//     *
+//     * @param photoId UUID фотографии
+//     * @return миниатюра
+//     */
+//    @GetMapping("/{photoId}/thumbnail")
+//    public ResponseEntity<Resource> getThumbnail(@PathVariable UUID photoId) {
+//        log.info("Запрос миниатюры: {}", photoId);
+//        return photoService.downloadThumbnailAsResource(photoId);
+//    }
 
     /**
      * Получает миниатюру фотографии.

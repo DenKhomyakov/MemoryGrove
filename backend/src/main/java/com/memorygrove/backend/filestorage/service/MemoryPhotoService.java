@@ -304,7 +304,7 @@ public class MemoryPhotoService {
     }
 
     /**
-     * Скачивает оригинальный файл фотографии по ID (публичный доступ).
+     * Скачивает оригинальный файл фотографии по ID.
      * Используется для прямого отображения в img src.
      */
     @Transactional(readOnly = true)
@@ -320,6 +320,25 @@ public class MemoryPhotoService {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + photo.getFileName() + "\"")
+                .body(resource);
+    }
+
+    /**
+     * Получает миниатюру по ID.
+     * Используется для прямого отображения в img src.
+     */
+    @Transactional(readOnly = true)
+    public ResponseEntity<Resource> downloadThumbnailAsResource(UUID photoId) {
+        MemoryPhoto photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Фотография не найдена"));
+
+        if (photo.getThumbnailPath() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = fileStorageService.loadFileAsResource(photo.getThumbnailPath());
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
                 .body(resource);
     }
 }
