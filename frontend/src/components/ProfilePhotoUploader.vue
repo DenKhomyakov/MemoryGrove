@@ -12,6 +12,7 @@
           :name="userFullName"
           size="large"
           :bg-color="avatarColor"
+          class="avatar-centered"
         />
 
         <div class="photo-actions">
@@ -205,24 +206,38 @@ const showNotificationMessage = (type, message) => {
 .photo-content {
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-height: 200px;
 }
 
 .current-photo {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.avatar-centered {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 .photo-actions {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .photo-hint {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
   font-size: 12px;
   color: var(--color-gray, #9e9e9e);
+  text-align: center;
 }
 
 .delete-photo-btn {
@@ -237,6 +252,8 @@ const showNotificationMessage = (type, message) => {
 @media (max-width: 768px) {
   .photo-actions {
     flex-direction: column;
+    width: 100%;
+    max-width: 250px;
   }
 
   .photo-actions button {
