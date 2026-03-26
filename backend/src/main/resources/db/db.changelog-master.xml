@@ -35,4 +35,6 @@
     <include file="db/changelog/20260308205400_create_message_templates.xml"/>
     <include file="db/changelog/20260308212600_alter_message_templates_user_id_nullable.xml"/>
 
+    <include file="db/changelog/20260326203100_add_user_photo.xml"/>
+
 </databaseChangeLog>

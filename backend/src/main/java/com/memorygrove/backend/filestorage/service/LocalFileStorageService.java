@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -41,12 +41,10 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public StoredFile storeFile(MultipartFile file, UUID userId) {
         try {
-            // Проверка на пустой файл
             if (file.isEmpty()) {
                 throw new FileStorageException("Не удалось сохранить пустой файл");
             }
 
-            // Проверка допустимого типа файла
             String contentType = file.getContentType();
             if (!fileStorageProperties.getAllowedTypes().contains(contentType)) {
                 throw new FileStorageException(
@@ -55,7 +53,6 @@ public class LocalFileStorageService implements FileStorageService {
                 );
             }
 
-            // Генерация уникального имени файла
             String originalFileName = file.getOriginalFilename();
             String extension = "";
             if (originalFileName != null && originalFileName.contains(".")) {
@@ -63,28 +60,21 @@ public class LocalFileStorageService implements FileStorageService {
             }
             String uniqueFileName = UUID.randomUUID() + extension;
 
-            // Создание пути для сохранения (user_id/год/месяц/уникальное_имя)
-            java.time.LocalDate now = java.time.LocalDate.now();
             String userDir = userId.toString();
-            String yearDir = String.valueOf(now.getYear());
-            String monthDir = String.format("%02d", now.getMonthValue());
+            String profilesDir = "profiles";
 
-            // Используем Unix-стиль путей (с прямыми слешами)
-            String relativePath = String.format("%s/%s/%s/%s", userDir, yearDir, monthDir, uniqueFileName);
+            String relativePath = String.format("%s/%s/%s", userDir, profilesDir, uniqueFileName);
 
             Path targetLocation = Paths.get(fileStorageProperties.getUploadDir())
                     .resolve(userDir)
-                    .resolve(yearDir)
-                    .resolve(monthDir)
+                    .resolve(profilesDir)
                     .resolve(uniqueFileName);
 
-            // Создание директорий, если их нет
             Files.createDirectories(targetLocation.getParent());
 
-            // Копирование файла
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            log.info("✅ Файл сохранён: {}", targetLocation.toString());
+            log.info("✅ Файл профиля сохранён: {}", targetLocation.toString());
 
             return new StoredFile(
                     originalFileName != null ? originalFileName : "unknown",
@@ -94,7 +84,7 @@ public class LocalFileStorageService implements FileStorageService {
             );
 
         } catch (IOException e) {
-            log.error("❌ Ошибка при сохранении файла: {}", e.getMessage());
+            log.error("❌ Ошибка при сохранении файла профиля: {}", e.getMessage());
             throw new FileStorageException("Не удалось сохранить файл", e);
         }
     }
@@ -105,31 +95,25 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public Resource loadFileAsResource(String filePath) {
         try {
-            // Если путь уже абсолютный или содержит корневую директорию, используем как есть
             Path path;
             if (filePath.startsWith("./uploads/") || filePath.startsWith("./thumbnails/")) {
-                // Относительный путь от корня проекта
                 path = Paths.get(filePath);
             } else {
-                // Иначе считаем, что это путь относительно соответствующей директории
                 String baseDir = filePath.contains("thumb") ?
                         fileStorageProperties.getThumbnailDir() :
                         fileStorageProperties.getUploadDir();
                 path = Paths.get(baseDir).resolve(filePath);
             }
 
-            // Нормализуем путь (убираем лишние разделители)
             path = path.normalize();
 
             log.debug("Загрузка файла по пути: {}", path.toString());
 
-            // Проверяем существование файла
             if (!Files.exists(path)) {
                 log.error("❌ Файл не существует: {}", path.toString());
                 throw new FileStorageException("Файл не найден: " + path.toString());
             }
 
-            // Проверяем права на чтение
             if (!Files.isReadable(path)) {
                 log.error("❌ Файл недоступен для чтения: {}", path.toString());
                 throw new FileStorageException("Файл недоступен для чтения: " + path.toString());
@@ -184,33 +168,28 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public String createThumbnail(String originalPath) {
         try {
-            // Превращаем входящую строку в полный абсолютный путь
-            // Если originalPath уже содержит "uploads/", то Paths.get его подхватит, normalize() уберет лишние "." и ".."
             Path sourcePath = Paths.get(originalPath).toAbsolutePath().normalize();
 
             if (!Files.exists(sourcePath)) {
-                // Если вдруг путь пришел без префикса uploads, попробуем склеить с конфигом (фикс баги)
                 sourcePath = Paths.get(fileStorageProperties.getUploadDir())
                         .resolve(originalPath)
                         .toAbsolutePath()
                         .normalize();
             }
 
-            log.debug("Попытка создать миниатюру для файла: {}", sourcePath);
+            log.debug("Создание миниатюры для: {}", sourcePath);
 
             if (!Files.exists(sourcePath)) {
                 throw new FileNotFoundException("Исходный файл не найден: " + sourcePath);
             }
 
-            // Определяем структуру папок (userId/year/month)
             Path uploadRoot = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
-            Path relativePath = uploadRoot.relativize(sourcePath); // Это userId/year/month/file.jpg
+            Path relativePath = uploadRoot.relativize(sourcePath);
 
-            Path subFolders = relativePath.getParent(); // userId/year/month
+            Path parentDir = relativePath.getParent();
 
-            // Формируем путь к папке миниатюр
             Path thumbnailDir = Paths.get(fileStorageProperties.getThumbnailDir())
-                    .resolve(subFolders)
+                    .resolve(parentDir)
                     .toAbsolutePath()
                     .normalize();
 
@@ -221,15 +200,13 @@ public class LocalFileStorageService implements FileStorageService {
             String fileName = sourcePath.getFileName().toString();
             Path targetPath = thumbnailDir.resolve("thumb_" + fileName);
 
-            // Генерация (используем абсолютные пути через toFile())
             Thumbnails.of(sourcePath.toFile())
                     .size(fileStorageProperties.getThumbnailSize(), fileStorageProperties.getThumbnailSize())
                     .outputFormat("jpg")
                     .toFile(targetPath.toFile());
 
-            log.info("✅ Миниатюра успешно создана: {}", targetPath);
+            log.info("✅ Миниатюра создана: {}", targetPath);
 
-            // Возвращаем путь для БД
             return targetPath.toString().replace("\\", "/");
 
         } catch (IOException e) {
@@ -251,32 +228,5 @@ public class LocalFileStorageService implements FileStorageService {
                     fileStorageProperties.getUploadDir();
             return Paths.get(baseDir).resolve(filePath);
         }
-    }
-
-    /**
-     * Проверяет и конвертирует старый формат пути в новый при необходимости
-     */
-    private String normalizeThumbnailPath(String thumbnailPath, UUID userId, LocalDateTime uploadDate) {
-        if (thumbnailPath == null) return null;
-
-        // Если путь уже в новом формате (содержит userId), возвращаем как есть
-        if (thumbnailPath.contains(userId.toString())) {
-            return thumbnailPath;
-        }
-
-        // Если путь в старом формате (например: ./thumbnails/03/thumb_...)
-        if (thumbnailPath.matches(".*/thumbnails/\\d{2}/.*")) {
-            String fileName = thumbnailPath.substring(thumbnailPath.lastIndexOf('/') + 1);
-            String year = String.valueOf(uploadDate.getYear());
-            String month = String.format("%02d", uploadDate.getMonthValue());
-
-            String newPath = String.format("./thumbnails/%s/%s/%s/%s",
-                    userId.toString(), year, month, fileName);
-
-            log.info("🔄 Конвертация старого пути {} в новый {}", thumbnailPath, newPath);
-            return newPath;
-        }
-
-        return thumbnailPath;
     }
 }

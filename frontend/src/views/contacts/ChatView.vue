@@ -6,9 +6,12 @@
       </button>
 
       <div class="contact-info" @click="goToContact">
-        <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact.contactId) }">
-          <span class="avatar-text">{{ getContactIcon(contact) }}</span>
-        </div>
+        <Avatar
+          :src="contact.photoUrl"
+          :name="contact.displayName"
+          size="small"
+          :bg-color="getContactColor(contact.contactId)"
+        />
         <div class="contact-details">
           <h2>{{ contact.displayName }}</h2>
           <p class="contact-subtitle">{{ contact.fullName }}</p>
@@ -131,6 +134,7 @@ import { useRouter } from 'vue-router'
 import Button from '@/components/UI/Button.vue'
 import TextArea from '@/components/UI/TextArea.vue'
 import Notification from '@/components/UI/Notification.vue'
+import Avatar from '@/components/UI/Avatar.vue'
 import MessageBubble from './components/MessageBubble.vue'
 import MessageTemplates from './components/MessageTemplates.vue'
 import contactService from '@/services/contactService'
@@ -235,13 +239,10 @@ const sendMessage = async () => {
 // Использование шаблона
 const useTemplate = (template) => {
   newMessage.value = template.content
-  // Фокус на поле ввода
-  // TODO: добавить фокус
 }
 
 // Управление шаблонами
 const manageTemplates = () => {
-  // TODO: открыть модалку управления шаблонами
   showNotificationMessage('info', 'Управление шаблонами будет доступно позже')
 }
 
@@ -361,23 +362,6 @@ onMounted(() => {
 
 .contact-info:hover {
   background-color: var(--color-white-smoke, #f5f5f5);
-}
-
-.contact-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.avatar-text {
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-  text-transform: uppercase;
 }
 
 .contact-details h2 {

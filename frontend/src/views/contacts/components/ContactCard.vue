@@ -1,8 +1,12 @@
 <template>
   <div class="contact-card" :class="{ 'inactive': !contact.isActive }" @click="$emit('click', contact)">
-    <div class="contact-avatar" :style="{ backgroundColor: getContactColor(contact.contactId) }">
-      <span class="avatar-text">{{ getContactIcon(contact) }}</span>
-    </div>
+    <Avatar
+      :src="contact.photoUrl"
+      :name="contact.displayName"
+      size="medium"
+      :bg-color="getContactColor(contact.contactId)"
+      class="contact-avatar"
+    />
 
     <div class="contact-info">
       <div class="contact-header">
@@ -63,7 +67,6 @@
       </div>
     </div>
 
-    <!-- Индикатор непрочитанных сообщений -->
     <div v-if="unreadCount > 0" class="unread-badge">
       {{ unreadCount }}
     </div>
@@ -71,6 +74,7 @@
 </template>
 
 <script setup>
+import Avatar from '@/components/UI/Avatar.vue'
 import contactService from '@/services/contactService'
 
 const props = defineProps({
@@ -125,23 +129,9 @@ const getContactColor = (contactId) => {
 
 /* Аватар */
 .contact-avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
 
-.avatar-text {
-  color: white;
-  font-size: 24px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-/* Информация о контакте */
 .contact-info {
   flex: 1;
   display: flex;
@@ -295,10 +285,6 @@ const getContactColor = (contactId) => {
   .contact-avatar {
     width: 50px;
     height: 50px;
-  }
-
-  .avatar-text {
-    font-size: 20px;
   }
 
   .contact-header {

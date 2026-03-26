@@ -154,6 +154,15 @@ public class ContactResponseDto {
     @JsonProperty("canReceiveNotifications")
     private boolean canReceiveNotifications;
 
+    @Schema(
+            description = "URL фотографии профиля",
+            example = "/api/users/83ba18af-2af1-4950-8a9e-6906a04b5461/photo",
+            accessMode = Schema.AccessMode.READ_ONLY,
+            nullable = true
+    )
+    @JsonProperty("photoUrl")
+    private String photoUrl;
+
     /**
      * Конвертирует сущность TrustedContact в DTO
      *
@@ -177,6 +186,7 @@ public class ContactResponseDto {
         dto.setActive(contact.isActive());
         dto.setCanSendMessages(contact.isCanSendMessages());
         dto.setCanReceiveNotifications(contact.isCanReceiveNotifications());
+        dto.setPhotoUrl(contactUser.getPhotoUrl());
 
         if (contact.getAddedAt() != null) {
             dto.setFormattedAddedAt(contact.getAddedAt().format(formatter));

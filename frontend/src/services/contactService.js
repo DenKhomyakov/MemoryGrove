@@ -12,8 +12,10 @@ class ContactService {
   async getActiveContacts() {
     try {
       const response = await apiClient.get('/contacts')
-      console.log('✅ Активные контакты получены:', response.data)
-      return response.data
+      const contacts = response.data || []
+      // Добавляем photoUrl к каждому контакту
+      console.log('✅ Активные контакты получены:', contacts)
+      return contacts
     } catch (error) {
       console.error('❌ Ошибка получения контактов:', error.response?.data || error.message)
       throw error

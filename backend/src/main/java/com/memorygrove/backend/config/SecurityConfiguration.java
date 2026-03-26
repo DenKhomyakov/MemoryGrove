@@ -65,7 +65,8 @@ public class SecurityConfiguration {
                                 "/swagger-resources/**",
                                 "/error",
                                 "/api/memory/photos/*/download",
-                                "/api/memory/photos/*/thumbnail"
+                                "/api/memory/photos/*/thumbnail",
+                                "/api/users/*/photo"
                         ).permitAll()
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
@@ -90,7 +91,6 @@ public class SecurityConfiguration {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
-        // Важно: явно указываем, что хотим скрыть исключение "UserNotFound"
         authProvider.setHideUserNotFoundExceptions(false);
         return authProvider;
     }

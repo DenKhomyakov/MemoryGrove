@@ -31,6 +31,13 @@
         </button>
         <button
           class="tab-button"
+          :class="{ active: activeTab === 'photo' }"
+          @click="switchToPhotoTab"
+        >
+          Фото
+        </button>
+        <button
+          class="tab-button"
           :class="{ active: activeTab === 'telegram' }"
           @click="switchToTelegramTab"
         >
@@ -316,6 +323,16 @@
         </div>
       </div>
 
+      <!-- Вкладка с фото профиля -->
+      <div v-else-if="activeTab === 'photo'" class="tab-content">
+        <ProfilePhotoUploader
+          :user-id="userData?.id"
+          :user-full-name="userData?.fullName"
+          :current-photo-url="userData?.photoUrl"
+          @photo-updated="handlePhotoUpdated"
+        />
+      </div>
+
       <!-- Вкладка Telegram -->
       <div v-else-if="activeTab === 'telegram'" class="tab-content">
         <TelegramBinding />
@@ -415,6 +432,7 @@ import Notification from '@/components/UI/Notification.vue'
 import TelegramBinding from '@/components/TelegramBinding.vue'
 import userService from '@/services/userService'
 import authService from '@/services/authService'
+import ProfilePhotoUploader from '@/components/ProfilePhotoUploader.vue'
 
 const router = useRouter()
 const activeTab = ref('profile')
@@ -559,6 +577,12 @@ const switchToIdTab = () => {
   activeTab.value = 'id'
   isEditing.value = false
   copySuccess.value = false
+}
+
+// Переключение на вкладку фото профиля
+const switchToPhotoTab = () => {
+  activeTab.value = 'photo'
+  isEditing.value = false
 }
 
 // Переключение на вкладку Telegram
@@ -864,6 +888,16 @@ const handleDeactivate = async () => {
     showNotificationMessage('error', error.response?.data?.message || 'Ошибка деактивации аккаунта')
   } finally {
     deactivating.value = false
+  }
+}
+
+// Обработчик обновления фото
+const handlePhotoUpdated = (updatedUser) => {
+  if (updatedUser) {
+    userData.value = updatedUser
+  } else {
+    // Фото удалено, обновляем данные пользователя
+    loadUserData()
   }
 }
 

@@ -254,6 +254,19 @@ public class UserResponseDto {
     private Integer age;
 
     /**
+     * URL фотографии профиля
+     */
+    @Schema(
+            description = "URL фотографии профиля",
+            example = "/api/users/73ba18af-2af1-4950-8a9e-6906a04b5461/photo",
+            accessMode = Schema.AccessMode.READ_ONLY,
+            nullable = true
+    )
+    @JsonProperty(value = "photoUrl", access = JsonProperty.Access.READ_ONLY)
+    @Description("URL фотографии профиля")
+    private String photoUrl;
+
+    /**
      * Метод (как конструктор) для созданеия DTO из сущности User
      * @param user DBO с данными
      * @return DTO с информацией о пользователе
@@ -279,6 +292,7 @@ public class UserResponseDto {
         dto.setDeactivationReason(user.getDeactivationReason());
         dto.setFullName(user.getFullName());
         dto.setAge(user.getAge());
+        dto.setPhotoUrl(user.getPhotoUrl());
 
         return dto;
     }

@@ -136,10 +136,6 @@ public class User {
 
     /**
      * Статус активности пользователя
-     * (если пользователь перестал использовать сервис, то вместо удаления аккаунта флаг устанавливается в false)
-     *
-     * true - активен
-     * false - неактивен
      */
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
@@ -156,6 +152,13 @@ public class User {
     @Size(max = 500, message = "Длина причины деактивации должна быть до 500 символов")
     @Column(name = "deactivation_reason")
     private String deactivationReason;
+
+    /**
+     * Путь к файлу фотографии профиля
+     */
+    @Size(max = 500, message = "Путь к фото не должен превышать 500 символов")
+    @Column(name = "photo_path")
+    private String photoPath;
 
     /**
      * Получение полного имени пользователя
@@ -175,6 +178,17 @@ public class User {
         }
 
         return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+    /**
+     * Получение URL фотографии профиля
+     */
+    @Transient
+    public String getPhotoUrl() {
+        if (photoPath == null) {
+            return null;
+        }
+        return "/api/users/" + id + "/photo";
     }
 
     /**

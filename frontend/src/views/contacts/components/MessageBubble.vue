@@ -1,5 +1,12 @@
 <template>
   <div class="message-bubble" :class="{ 'outgoing': message.outgoing }">
+    <Avatar
+      v-if="!message.outgoing && message.senderPhotoUrl"
+      :src="message.senderPhotoUrl"
+      :name="message.senderName"
+      size="small"
+      class="message-avatar"
+    />
     <div class="message-content">
       <div class="message-text">{{ message.content }}</div>
       <div class="message-meta">
@@ -24,6 +31,7 @@
 </template>
 
 <script setup>
+import Avatar from '@/components/UI/Avatar.vue'
 import contactService from '@/services/contactService'
 
 const props = defineProps({
@@ -44,10 +52,20 @@ const formatTime = (dateString) => {
 .message-bubble {
   display: flex;
   margin-bottom: 12px;
+  gap: 8px;
 }
 
 .message-bubble.outgoing {
   justify-content: flex-end;
+}
+
+.message-bubble:not(.outgoing) {
+  justify-content: flex-start;
+}
+
+.message-avatar {
+  align-self: flex-end;
+  margin-bottom: 4px;
 }
 
 .message-content {

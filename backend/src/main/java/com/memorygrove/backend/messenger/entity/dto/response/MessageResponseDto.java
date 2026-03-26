@@ -21,9 +21,6 @@ import java.util.UUID;
 @Schema(description = "Информация о сообщении")
 public class MessageResponseDto {
 
-    /**
-     * ID сообщения
-     */
     @Schema(
             description = "ID сообщения",
             example = "73ba18af-2af1-4950-8a9e-6906a04b5461",
@@ -32,9 +29,6 @@ public class MessageResponseDto {
     @JsonProperty("id")
     private UUID id;
 
-    /**
-     * ID отправителя
-     */
     @Schema(
             description = "ID отправителя",
             example = "83ba18af-2af1-4950-8a9e-6906a04b5461",
@@ -43,9 +37,6 @@ public class MessageResponseDto {
     @JsonProperty("senderId")
     private UUID senderId;
 
-    /**
-     * Имя отправителя
-     */
     @Schema(
             description = "Имя отправителя",
             example = "Иванов Иван",
@@ -54,9 +45,6 @@ public class MessageResponseDto {
     @JsonProperty("senderName")
     private String senderName;
 
-    /**
-     * ID получателя
-     */
     @Schema(
             description = "ID получателя",
             example = "93ba18af-2af1-4950-8a9e-6906a04b5461",
@@ -65,9 +53,6 @@ public class MessageResponseDto {
     @JsonProperty("receiverId")
     private UUID receiverId;
 
-    /**
-     * Имя получателя
-     */
     @Schema(
             description = "Имя получателя",
             example = "Петров Пётр",
@@ -76,9 +61,6 @@ public class MessageResponseDto {
     @JsonProperty("receiverName")
     private String receiverName;
 
-    /**
-     * Текст сообщения
-     */
     @Schema(
             description = "Текст сообщения",
             example = "Привет! Как дела?",
@@ -87,20 +69,14 @@ public class MessageResponseDto {
     @JsonProperty("content")
     private String content;
 
-    /**
-     * Дата и время отправки
-     */
     @Schema(
-            description = "Дата отправки",
+            description = "Дата и время отправки",
             example = "2026-03-09T15:30:00",
             accessMode = Schema.AccessMode.READ_ONLY
     )
     @JsonProperty("sentAt")
     private LocalDateTime sentAt;
 
-    /**
-     * Отформатированная дата отправки
-     */
     @Schema(
             description = "Отформатированная дата отправки",
             example = "9 марта 2026, 15:30",
@@ -109,11 +85,8 @@ public class MessageResponseDto {
     @JsonProperty("formattedSentAt")
     private String formattedSentAt;
 
-    /**
-     * Дата и время прочтения
-     */
     @Schema(
-            description = "Дата прочтения",
+            description = "Дата и время прочтения",
             example = "2026-03-09T15:31:00",
             accessMode = Schema.AccessMode.READ_ONLY,
             nullable = true
@@ -121,35 +94,31 @@ public class MessageResponseDto {
     @JsonProperty("readAt")
     private LocalDateTime readAt;
 
-    /**
-     * Флаг, прочитано ли сообщение
-     */
     @Schema(
-            description = "Прочитано ли",
+            description = "Флаг, прочитано ли сообщение",
             example = "false",
             accessMode = Schema.AccessMode.READ_ONLY
     )
     @JsonProperty("isRead")
     private boolean isRead;
 
-    /**
-     * Флаг, отправлено ли сообщение от текущего пользователя
-     */
     @Schema(
-            description = "Отправлено ли текущим пользователем",
+            description = "Флаг, отправлено ли сообщение от текущего пользователя",
             example = "true",
             accessMode = Schema.AccessMode.READ_ONLY
     )
     @JsonProperty("isOutgoing")
     private boolean isOutgoing;
 
-    /**
-     * Конвертирует сущность Message в DTO
-     *
-     * @param message сущность сообщения
-     * @param currentUserId ID текущего пользователя
-     * @return DTO с данными сообщения
-     */
+    @Schema(
+            description = "URL фотографии профиля отправителя",
+            example = "/api/users/83ba18af-2af1-4950-8a9e-6906a04b5461/photo",
+            accessMode = Schema.AccessMode.READ_ONLY,
+            nullable = true
+    )
+    @JsonProperty("senderPhotoUrl")
+    private String senderPhotoUrl;
+
     public static MessageResponseDto fromEntity(Message message, UUID currentUserId) {
         MessageResponseDto dto = new MessageResponseDto();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm");
@@ -167,6 +136,7 @@ public class MessageResponseDto {
         dto.setReadAt(message.getReadAt());
         dto.setRead(message.isRead());
         dto.setOutgoing(sender.getId().equals(currentUserId));
+        dto.setSenderPhotoUrl(sender.getPhotoUrl());
 
         if (message.getSentAt() != null) {
             dto.setFormattedSentAt(message.getSentAt().format(formatter));
