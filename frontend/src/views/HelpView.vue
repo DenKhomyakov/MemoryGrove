@@ -200,12 +200,10 @@
         </div>
       </section>
 
-      <!-- Экстренный выход (для безопасности) -->
       <div class="emergency-exit">
         <button @click="closeHelp" class="exit-button">
-          <span>✕</span> Быстрый выход
+          <span>✕</span> Вернуться к модулям
         </button>
-        <p class="exit-note">Если вам нужно срочно покинуть страницу, нажмите эту кнопку</p>
       </div>
     </div>
 
