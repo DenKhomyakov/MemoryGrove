@@ -5,7 +5,6 @@
         <!-- Шапка просмотрщика -->
         <div class="viewer-header">
           <div class="photo-info">
-            <h2>{{ currentPhoto.title || 'Без названия' }}</h2>
             <span class="photo-date">{{ currentPhoto.formattedUploadDate }}</span>
           </div>
 

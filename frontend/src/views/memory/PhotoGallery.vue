@@ -133,7 +133,6 @@
 
           <div class="list-info">
             <div class="list-header">
-              <h4>{{ photo.title || 'Без названия' }}</h4>
               <span class="list-date">{{ photo.formattedUploadDate }}</span>
             </div>
 

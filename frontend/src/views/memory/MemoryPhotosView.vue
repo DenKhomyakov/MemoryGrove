@@ -256,7 +256,7 @@ const closeEditForm = () => {
 
 // Удаление фотографии
 const deletePhoto = async (photo) => {
-  if (!confirm(`Удалить фотографию "${photo.title || 'без названия'}"?`)) {
+  if (!confirm(`Удалить фотографию?`)) {
     return
   }
 

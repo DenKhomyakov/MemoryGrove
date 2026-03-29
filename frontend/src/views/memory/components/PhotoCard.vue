@@ -19,7 +19,6 @@
 
     <div class="photo-info">
       <div class="photo-header">
-        <h3 class="photo-title">{{ photo.title || 'Без названия' }}</h3>
         <span class="photo-date">{{ photo.formattedUploadDate || formatDate(photo.uploadDate) }}</span>
       </div>
 
@@ -54,7 +53,6 @@
       <!-- Футер с действиями -->
       <div class="photo-footer">
         <div class="photo-meta">
-          <span class="meta-item">ID: {{ shortId }}</span>
           <span v-if="photo.isEdited" class="edited-indicator" title="Было отредактировано">
             📝
           </span>
