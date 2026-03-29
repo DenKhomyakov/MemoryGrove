@@ -382,30 +382,30 @@
       </div>
 
       <!-- Информация о статусе аккаунта -->
-      <div class="account-status" v-if="userData">
-        <div class="status-item">
-          <span class="status-label">Дата регистрации:</span>
-          <span class="status-value">{{ formatDateTime(userData.createdAt) }}</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Последний вход:</span>
-          <span class="status-value">{{ userData.lastLoginAt ? formatDateTime(userData.lastLoginAt) : 'Не выполнялся' }}</span>
-        </div>
-        <div class="status-item" v-if="!userData.active">
-          <span class="status-label">Дата деактивации:</span>
-          <span class="status-value">{{ formatDateTime(userData.deactivatedAt) || '—' }}</span>
-        </div>
-        <div class="status-item" v-if="!userData.active && userData.deactivationReason">
-          <span class="status-label">Причина деактивации:</span>
-          <span class="status-value">{{ userData.deactivationReason }}</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Статус аккаунта:</span>
-          <span class="status-value" :class="{ 'status-active': userData.active, 'status-inactive': !userData.active }">
-            {{ userData.active ? 'Активен' : 'Деактивирован' }}
-          </span>
-        </div>
-      </div>
+<!--      <div class="account-status" v-if="userData">-->
+<!--        <div class="status-item">-->
+<!--          <span class="status-label">Дата регистрации:</span>-->
+<!--          <span class="status-value">{{ formatDateTime(userData.createdAt) }}</span>-->
+<!--        </div>-->
+<!--        <div class="status-item">-->
+<!--          <span class="status-label">Последний вход:</span>-->
+<!--          <span class="status-value">{{ userData.lastLoginAt ? formatDateTime(userData.lastLoginAt) : 'Не выполнялся' }}</span>-->
+<!--        </div>-->
+<!--        <div class="status-item" v-if="!userData.active">-->
+<!--          <span class="status-label">Дата деактивации:</span>-->
+<!--          <span class="status-value">{{ formatDateTime(userData.deactivatedAt) || '—' }}</span>-->
+<!--        </div>-->
+<!--        <div class="status-item" v-if="!userData.active && userData.deactivationReason">-->
+<!--          <span class="status-label">Причина деактивации:</span>-->
+<!--          <span class="status-value">{{ userData.deactivationReason }}</span>-->
+<!--        </div>-->
+<!--        <div class="status-item">-->
+<!--          <span class="status-label">Статус аккаунта:</span>-->
+<!--          <span class="status-value" :class="{ 'status-active': userData.active, 'status-inactive': !userData.active }">-->
+<!--            {{ userData.active ? 'Активен' : 'Деактивирован' }}-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
     </div>
 
     <!-- Уведомления -->
