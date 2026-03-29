@@ -270,8 +270,7 @@ const emit = defineEmits(['back'])
 const difficulties = [
   { value: 'all', label: 'Все уровни', color: 'var(--color-gray)' },
   { value: 'easy', label: 'Простой', color: 'var(--color-success)' },
-  { value: 'medium', label: 'Средний', color: 'var(--color-warning)' },
-  { value: 'hard', label: 'Сложный', color: 'var(--color-error)' }
+  { value: 'medium', label: 'Средний', color: 'var(--color-warning)' }
 ]
 
 // Состояния
@@ -355,7 +354,6 @@ const getDifficultyDisplayLocal = (diff) => {
   const map = {
     'easy': '🟢 Простой',
     'medium': '🟡 Средний',
-    'hard': '🔴 Сложный',
     'mixed': '🔄 Смешанный'
   }
   return map[diff] || diff
@@ -366,7 +364,6 @@ const getDifficultyColorLocal = (diff) => {
   const map = {
     'easy': 'var(--color-success, #4caf50)',
     'medium': 'var(--color-warning, #ff9800)',
-    'hard': 'var(--color-error, #f44336)',
     'mixed': 'var(--color-gray, #9e9e9e)'
   }
   return map[diff] || 'var(--color-gray, #9e9e9e)'
