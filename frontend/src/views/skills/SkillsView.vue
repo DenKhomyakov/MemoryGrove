@@ -6,12 +6,20 @@
         <p class="subtitle">Отслеживайте, какие навыки вы уже освоили</p>
       </div>
 
-      <Button
-        variant="primary"
-        @click="createNewSkill"
-      >
-        + Новый навык
-      </Button>
+      <div class="header-actions">
+        <Button
+          variant="primary"
+          @click="createNewSkill"
+        >
+          + Новый навык
+        </Button>
+        <Button
+          variant="outline"
+          @click="goBack"
+        >
+          ← Назад к модулям
+        </Button>
+      </div>
     </div>
 
     <!-- Общая статистика -->
@@ -198,7 +206,9 @@ import Notification from '@/components/UI/Notification.vue'
 import SkillCard from './components/SkillCard.vue'
 import SkillForm from './SkillForm.vue'
 import skillService from '@/services/skillService'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const loading = ref(true)
 const skills = ref([])
 const categoryStats = ref([])
@@ -389,6 +399,11 @@ const showNotificationMessage = (type, message) => {
   showNotification.value = true
 }
 
+// Возврат на главную
+const goBack = () => {
+  router.push('/')
+}
+
 onMounted(() => {
   loadData()
 })
@@ -415,6 +430,18 @@ onMounted(() => {
   font-size: 32px;
   color: var(--color-primary-dark, #6aa91c);
   margin: 0 0 4px 0;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #88d424);
+  box-shadow: 0 0 0 3px rgba(136, 212, 36, 0.1);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .subtitle {
@@ -783,6 +810,18 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .page-header button {
+    width: 100%;
   }
 
   .page-header button {

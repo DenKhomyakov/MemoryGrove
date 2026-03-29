@@ -6,12 +6,20 @@
         <p class="subtitle">Записывайте свои мысли, чувства и воспоминания</p>
       </div>
 
-      <Button
-        variant="primary"
-        @click="createNewEntry"
-      >
-        + Новая запись
-      </Button>
+      <div class="header-actions">
+        <Button
+          variant="primary"
+          @click="createNewEntry"
+        >
+          + Новая запись
+        </Button>
+        <Button
+          variant="outline"
+          @click="goBack"
+        >
+          ← Назад к модулям
+        </Button>
+      </div>
     </div>
 
     <!-- Статистика -->
@@ -250,6 +258,11 @@ const showNotificationMessage = (type, message) => {
   showNotification.value = true
 }
 
+// Возврат на главную
+const goBack = () => {
+  router.push('/')
+}
+
 onMounted(() => {
   loadEntries()
   loadStats()
@@ -284,6 +297,18 @@ onMounted(() => {
   color: var(--color-gray, #9e9e9e);
   margin: 0;
   font-size: 16px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #88d424);
+  box-shadow: 0 0 0 3px rgba(136, 212, 36, 0.1);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Статистика */
@@ -480,6 +505,14 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
   }
 
   .journal-header button {

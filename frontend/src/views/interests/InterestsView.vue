@@ -6,12 +6,20 @@
         <p class="subtitle">Фильмы, книги, музыка и всё, что вам нравится</p>
       </div>
 
-      <Button
-        variant="primary"
-        @click="createNewInterest"
-      >
-        + Новый интерес
-      </Button>
+      <div class="header-actions">
+        <Button
+          variant="primary"
+          @click="createNewInterest"
+        >
+          + Новый интерес
+        </Button>
+        <Button
+          variant="outline"
+          @click="goBack"
+        >
+          ← Назад к модулям
+        </Button>
+      </div>
     </div>
 
     <!-- Статистика по категориям -->
@@ -161,7 +169,9 @@ import Notification from '@/components/UI/Notification.vue'
 import InterestCard from './components/InterestCard.vue'
 import InterestForm from './InterestForm.vue'
 import interestService from '@/services/interestService'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const loading = ref(true)
 const interests = ref([])
 const stats = ref([])
@@ -325,6 +335,11 @@ const showNotificationMessage = (type, message) => {
   showNotification.value = true
 }
 
+// Возврат на главную
+const goBack = () => {
+  router.push('/')
+}
+
 onMounted(() => {
   loadData()
 })
@@ -351,6 +366,18 @@ onMounted(() => {
   font-size: 32px;
   color: var(--color-primary-dark, #6aa91c);
   margin: 0 0 4px 0;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #88d424);
+  box-shadow: 0 0 0 3px rgba(136, 212, 36, 0.1);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .subtitle {
@@ -601,6 +628,18 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .page-header button {
+    width: 100%;
   }
 
   .page-header button {
