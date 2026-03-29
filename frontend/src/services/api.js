@@ -37,7 +37,6 @@ apiClient.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       console.log('🔒 Ошибка 401 - неавторизован')
-      // ToDo: Можно добавить логику для refresh токена или перенаправление на страницу входа
     }
     return Promise.reject(error)
   }

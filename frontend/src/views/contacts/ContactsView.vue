@@ -258,8 +258,6 @@ const loadData = async () => {
 // Загрузка количества непрочитанных
 const loadUnreadCounts = async () => {
   try {
-    // TODO: получить количество непрочитанных по каждому контакту
-    // Пока заглушка
     unreadCounts.value = {}
   } catch (error) {
     console.error('❌ Ошибка загрузки непрочитанных:', error)

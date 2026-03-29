@@ -230,7 +230,6 @@ const unbindTelegram = async () => {
 
 // Переключение уведомлений
 const toggleNotifications = async () => {
-  // TODO: добавить эндпоинт для переключения уведомлений
   showNotificationMessage('info', 'Функция в разработке')
   notificationsEnabled.value = !notificationsEnabled.value
 }

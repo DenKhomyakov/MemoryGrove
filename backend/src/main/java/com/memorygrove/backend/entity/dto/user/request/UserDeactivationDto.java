@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-// ToDo: Сделать справочник причин деактивации пользователя
 /**
  * DTO для деактивации пользователя
  */

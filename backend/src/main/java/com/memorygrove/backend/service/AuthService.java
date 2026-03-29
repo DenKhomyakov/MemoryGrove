@@ -142,16 +142,12 @@ public class AuthService {
 
     /**
      * Выполняет выход пользователя из системы
-     * Очищает контекст безопасности и может добавить токен в черный список
      *
      * @param token JWT токен для выхода (может использоваться для добавления токена в черный список)
      */
     public void logout(String token) {
         log.info("Выход пользователя из системы");
         SecurityContextHolder.clearContext();
-
-        // ToDo: Здесь можно добавить логику для добавления токена в черный список (TokenBlacklistService)
-        //tokenBlacklistService.addToBlacklist(token);
     }
 
     /**

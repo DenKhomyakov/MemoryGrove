@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-// ToDo: Сделать функционал по смене роли через API
 /**
  * DTO для обновления данных пользователя
  * (не содержит электронную почту, пароль)
