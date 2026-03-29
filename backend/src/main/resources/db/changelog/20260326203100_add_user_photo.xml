@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260326213000" author="KhomyakovDA">
+        <comment>Добавление поля photo_path в таблицу users для хранения фотографии профиля</comment>
+
+        <addColumn tableName="users">
+            <column name="photo_path" type="VARCHAR(500)" remarks="Путь к фотографии профиля">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="users" columnName="photo_path"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

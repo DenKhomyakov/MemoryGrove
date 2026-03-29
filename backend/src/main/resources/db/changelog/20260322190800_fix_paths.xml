@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260322190800" author="KhomyakovDA">
+        <update tableName="memory_photos">
+            <column name="thumbnail_path"
+                    valueComputed="CONCAT('thumbnails/', user_id, '/', year, '/',
+                                   LPAD(EXTRACT(MONTH FROM upload_date)::text, 2, '0'),
+                                   '/thumb_', file_name)"/>
+            <where>thumbnail_path IS NULL OR thumbnail_path NOT LIKE 'thumbnails/%/%/%'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

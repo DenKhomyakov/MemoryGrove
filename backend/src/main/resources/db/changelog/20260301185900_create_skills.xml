@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260301185900" author="KhomyakovDA">
+
+        <comment>Создание таблицы skills для хранения анкеты навыков пользователя</comment>
+
+        <createTable tableName="skills" remarks="Анкета навыков пользователя (чек-лист действий)">
+
+            <column name="id" type="UUID" remarks="ID навыка">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="category" type="VARCHAR(20)" remarks="Категория навыка">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(200)" remarks="Название навыка">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(1000)" remarks="Описание навыка">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="can_do_now" type="BOOLEAN" defaultValueBoolean="false" remarks="Может выполнять сейчас">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_performed_at" type="TIMESTAMP" remarks="Дата последнего выполнения">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="difficulty" type="INT" remarks="Сложность (1-5)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="importance" type="INT" remarks="Важность (1-5)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="notes" type="VARCHAR(500)" remarks="Заметки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="sort_order" type="INT" remarks="Порядок сортировки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к users -->
+        <addForeignKeyConstraint
+                baseTableName="skills"
+                baseColumnNames="user_id"
+                constraintName="fk_skills_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="skills" indexName="idx_skills_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="skills" indexName="idx_skills_category">
+            <column name="category"/>
+        </createIndex>
+
+        <createIndex tableName="skills" indexName="idx_skills_user_category">
+            <column name="user_id"/>
+            <column name="category"/>
+        </createIndex>
+
+        <createIndex tableName="skills" indexName="idx_skills_can_do_now">
+            <column name="can_do_now"/>
+        </createIndex>
+
+        <createIndex tableName="skills" indexName="idx_skills_sort_order">
+            <column name="sort_order"/>
+        </createIndex>
+
+        <!-- Проверки для полей difficulty и importance -->
+        <sql>
+            <![CDATA[
+            ALTER TABLE skills ADD CONSTRAINT check_difficulty_range
+                CHECK (difficulty IS NULL OR (difficulty >= 1 AND difficulty <= 5));
+
+            ALTER TABLE skills ADD CONSTRAINT check_importance_range
+                CHECK (importance IS NULL OR (importance >= 1 AND importance <= 5));
+            ]]>
+        </sql>
+
+        <rollback>
+            <dropTable tableName="skills"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

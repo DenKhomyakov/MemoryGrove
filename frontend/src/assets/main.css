@@ -1,0 +1,51 @@
+@import './base.css';
+
+:root {
+  --color-primary: #88d424;
+  --color-primary-light: #a8e454;
+  --color-primary-dark: #6aa91c;
+  --color-white: #ffffff;
+  --color-white-smoke: #f5f5f5;
+  --color-light-gray: #e0e0e0;
+  --color-gray: #9e9e9e;
+  --color-dark-gray: #616161;
+  --color-error: #f44336;
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-field-border: #d0d0d0;
+  --color-field-focus: #88d424;
+  --color-field-error: #f44336;
+  --color-field-label: #757575;
+  --color-field-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-dark-gray);
+  background: var(--color-white-smoke);
+  line-height: 1.6;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+  Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}

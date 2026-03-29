@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260302202200" author="KhomyakovDA">
+
+        <comment>Создание таблицы memory_photos для хранения фотографий пользователей</comment>
+
+        <createTable tableName="memory_photos" remarks="Фотографии пользователя (цифровая память)">
+
+            <column name="id" type="UUID" remarks="Уникальный идентификатор фотографии">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя, загрузившего фотографию">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="file_name" type="VARCHAR(255)" remarks="Оригинальное имя файла">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="storage_path" type="VARCHAR(500)" remarks="Путь к файлу на сервере">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="thumbnail_path" type="VARCHAR(500)" remarks="Путь к миниатюре (может быть null)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="description" type="VARCHAR(1000)" remarks="Описание фотографии">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="location" type="VARCHAR(255)" remarks="Место съёмки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="year" type="INT" remarks="Год съёмки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="people" type="VARCHAR(500)" remarks="Люди на фотографии (имена через запятую)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="upload_date" type="TIMESTAMP" remarks="Дата и время загрузки">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="file_size" type="BIGINT" remarks="Размер файла в байтах">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="content_type" type="VARCHAR(100)" remarks="MIME-тип файла">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания записи">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к таблице users -->
+        <addForeignKeyConstraint
+                baseTableName="memory_photos"
+                baseColumnNames="user_id"
+                constraintName="fk_memory_photos_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы для быстрого поиска -->
+        <createIndex tableName="memory_photos" indexName="idx_memory_photos_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="memory_photos" indexName="idx_memory_photos_upload_date">
+            <column name="upload_date"/>
+        </createIndex>
+
+        <createIndex tableName="memory_photos" indexName="idx_memory_photos_user_year">
+            <column name="user_id"/>
+            <column name="year"/>
+        </createIndex>
+
+        <createIndex tableName="memory_photos" indexName="idx_memory_photos_user_location">
+            <column name="user_id"/>
+            <column name="location"/>
+        </createIndex>
+
+        <!-- Комментарии к таблице и колонкам для документации в БД -->
+        <sql>
+            <![CDATA[
+            COMMENT ON TABLE memory_photos IS 'Хранилище фотографий пользователей для модуля цифровой памяти';
+            COMMENT ON COLUMN memory_photos.id IS 'Уникальный идентификатор фотографии (UUID)';
+            COMMENT ON COLUMN memory_photos.user_id IS 'ID пользователя, загрузившего фотографию (связь с users)';
+            COMMENT ON COLUMN memory_photos.file_name IS 'Оригинальное имя файла, как было у пользователя';
+            COMMENT ON COLUMN memory_photos.storage_path IS 'Полный путь к файлу на сервере';
+            COMMENT ON COLUMN memory_photos.thumbnail_path IS 'Путь к миниатюре (создаётся автоматически)';
+            COMMENT ON COLUMN memory_photos.description IS 'Текстовое описание фотографии (что на ней, контекст)';
+            COMMENT ON COLUMN memory_photos.location IS 'Место, где была сделана фотография';
+            COMMENT ON COLUMN memory_photos.year IS 'Год, к которому относится фотография';
+            COMMENT ON COLUMN memory_photos.people IS 'Имена людей, изображённых на фотографии';
+            COMMENT ON COLUMN memory_photos.upload_date IS 'Дата и время загрузки в систему';
+            COMMENT ON COLUMN memory_photos.file_size IS 'Размер файла в байтах для статистики';
+            COMMENT ON COLUMN memory_photos.content_type IS 'MIME-тип файла (image/jpeg, image/png и т.д.)';
+            COMMENT ON COLUMN memory_photos.created_at IS 'Дата создания записи в БД';
+            COMMENT ON COLUMN memory_photos.updated_at IS 'Дата последнего обновления метаданных';
+            ]]>
+        </sql>
+
+        <!-- Проверка для года (от 1900 до текущего года + 1) -->
+        <sql>
+            <![CDATA[
+            ALTER TABLE memory_photos ADD CONSTRAINT check_year_range
+                CHECK (year IS NULL OR (year >= 1900 AND year <= EXTRACT(YEAR FROM CURRENT_DATE) + 1));
+            ]]>
+        </sql>
+
+        <rollback>
+            <dropTable tableName="memory_photos"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

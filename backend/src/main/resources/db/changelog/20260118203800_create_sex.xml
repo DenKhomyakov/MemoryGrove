@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260118203800" author="KhomyakovDA">
+
+        <createTable tableName="sexes" remarks="Справочник полов пользователя">
+
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(50)" remarks="Наименование пола">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <insert tableName="sexes">
+            <column name="id" value="6b426722-1c17-4900-ab99-f3374a8e3880"/>
+            <column name="name" value="Мужской"/>
+        </insert>
+
+        <insert tableName="sexes">
+            <column name="id" value="64b6d07b-6198-4c12-976b-9ebb507680cd"/>
+            <column name="name" value="Женский"/>
+        </insert>
+
+        <createIndex tableName="sexes" indexName="idx_sexes_name">
+            <column name="name"/>
+        </createIndex>
+
+        <rollback>
+
+            <dropTable tableName="sexes"/>
+
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

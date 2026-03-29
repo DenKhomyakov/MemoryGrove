@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260308212600" author="KhomyakovDA">
+
+        <comment>Изменение поля user_id в таблице message_templates: разрешаем NULL значения для системных шаблонов</comment>
+
+        <!-- Меняем ограничение с NOT NULL на NULL -->
+        <dropNotNullConstraint
+                tableName="message_templates"
+                columnName="user_id"
+                columnDataType="UUID"/>
+
+        <rollback>
+            <!-- Возвращаем NOT NULL constraint -->
+            <addNotNullConstraint
+                    tableName="message_templates"
+                    columnName="user_id"
+                    columnDataType="UUID"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

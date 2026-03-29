@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260224204000" author="KhomyakovDA">
+
+        <createTable tableName="telegram_bindings" remarks="Привязка пользователей к Telegram">
+
+            <column name="id" type="UUID" remarks="ID записи">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="chat_id" type="BIGINT" remarks="ID чата в Telegram">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="telegram_username" type="VARCHAR(255)" remarks="Username в Telegram">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="first_name" type="VARCHAR(255)" remarks="Имя в Telegram">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="last_name" type="VARCHAR(255)" remarks="Фамилия в Telegram">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="notifications_enabled" type="BOOLEAN" defaultValueBoolean="true"
+                    remarks="Включены ли уведомления">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="bound_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"
+                    remarks="Дата и время привязки">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="binding_code" type="VARCHAR(50)" remarks="Код для привязки">
+                <constraints nullable="true" unique="true"/>
+            </column>
+
+            <column name="code_expires_at" type="TIMESTAMP" remarks="Срок действия кода">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="telegram_bindings"
+                baseColumnNames="user_id"
+                constraintName="fk_telegram_bindings_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="telegram_bindings" indexName="idx_telegram_bindings_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="telegram_bindings" indexName="idx_telegram_bindings_chat_id">
+            <column name="chat_id"/>
+        </createIndex>
+
+        <createIndex tableName="telegram_bindings" indexName="idx_telegram_bindings_code">
+            <column name="binding_code"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="telegram_bindings"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

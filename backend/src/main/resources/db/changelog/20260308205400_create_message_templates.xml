@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20260308205400" author="KhomyakovDA">
+
+        <comment>Создание таблицы message_templates для хранения шаблонов сообщений</comment>
+
+        <createTable tableName="message_templates" remarks="Шаблоны сообщений для быстрого ответа">
+
+            <column name="id" type="UUID" remarks="Уникальный идентификатор шаблона">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="ID пользователя, создавшего шаблон">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(100)" remarks="Название шаблона (для отображения на кнопке)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content" type="VARCHAR(500)" remarks="Текст шаблона">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sort_order" type="INT" remarks="Порядок сортировки">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="is_default" type="BOOLEAN" defaultValueBoolean="false" remarks="Системный шаблон (нельзя удалить)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+
+        </createTable>
+
+        <!-- Внешний ключ к users -->
+        <addForeignKeyConstraint
+                baseTableName="message_templates"
+                baseColumnNames="user_id"
+                constraintName="fk_message_templates_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="message_templates" indexName="idx_message_templates_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="message_templates" indexName="idx_message_templates_sort_order">
+            <column name="sort_order"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="message_templates"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
