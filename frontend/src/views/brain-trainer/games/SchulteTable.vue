@@ -54,6 +54,29 @@
               </button>
             </div>
           </div>
+
+          <div class="setting-group">
+            <label class="setting-label">Режим подсказки:</label>
+            <div class="hint-mode-buttons">
+              <button
+                class="hint-mode-button"
+                :class="{ active: hintMode === 'with' }"
+                @click="hintMode = 'with'"
+              >
+                🔍 С подсказкой
+              </button>
+              <button
+                class="hint-mode-button"
+                :class="{ active: hintMode === 'without' }"
+                @click="hintMode = 'without'"
+              >
+                🧠 Без подсказки
+              </button>
+            </div>
+            <p class="setting-hint" v-if="hintMode === 'without'">
+              В этом режиме нужно самостоятельно искать следующее число
+            </p>
+          </div>
         </div>
 
         <Button
@@ -72,8 +95,11 @@
             Найдено: {{ currentNumber - 1 }} из {{ totalNumbers }}
           </div>
           <div class="timer">⏱️ {{ formatTime(timeSeconds) }}</div>
-          <div class="next-number">
+          <div class="next-number" v-if="hintMode === 'with'">
             Следующее: <span class="next-value">{{ currentNumber }}</span>
+          </div>
+          <div class="next-number" v-else>
+            Ищите: <span class="next-value">?</span>
           </div>
         </div>
 
@@ -90,7 +116,8 @@
               class="table-cell"
               :class="{
                 'found': cell.found,
-                'current': !cell.found && cell.value === currentNumber
+                'current': hintMode === 'with' && !cell.found && cell.value === currentNumber,
+                'wrong-click': showWrongClick && lastWrongClick === cell.value
               }"
               @click="onCellClick(cell)"
               :disabled="cell.found"
@@ -136,6 +163,10 @@
           <div class="result-item">
             <span class="result-label">Размер таблицы:</span>
             <span class="result-value">{{ tableSize }}×{{ tableSize }}</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Режим подсказки:</span>
+            <span class="result-value">{{ hintMode === 'with' ? 'С подсказкой' : 'Без подсказки' }}</span>
           </div>
           <div class="result-item">
             <span class="result-label">Время:</span>
@@ -225,8 +256,9 @@ const timeThresholds = {
 // Состояния
 const stats = ref(null)
 const loading = ref(false)
-const currentPhase = ref('start') // start, playing, results
+const currentPhase = ref('start')
 const tableSize = ref(5)
+const hintMode = ref('with')
 const table = ref([])
 const currentNumber = ref(1)
 const timeSeconds = ref(0)
@@ -234,6 +266,9 @@ const timerInterval = ref(null)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
+const showWrongClick = ref(false)
+const lastWrongClick = ref(null)
+let wrongClickTimeout = null
 
 // Общее количество чисел
 const totalNumbers = computed(() => {
@@ -327,7 +362,7 @@ const startGame = () => {
     timeSeconds.value = 0
     currentPhase.value = 'playing'
     startTimer()
-    console.log('🎮 Начало игры, размер:', tableSize.value)
+    console.log('🎮 Начало игры, размер:', tableSize.value, 'режим подсказки:', hintMode.value)
   } catch (error) {
     console.error('❌ Ошибка начала игры:', error)
     showNotificationMessage('error', 'Ошибка при создании таблицы')
@@ -340,6 +375,19 @@ const resetGame = () => {
   currentNumber.value = 1
   timeSeconds.value = 0
   // Таймер не останавливаем, просто обнуляем
+}
+
+// Показать визуальную обратную связь при неправильном клике
+const showWrongClickFeedback = (value) => {
+  if (wrongClickTimeout) {
+    clearTimeout(wrongClickTimeout)
+  }
+  showWrongClick.value = true
+  lastWrongClick.value = value
+  wrongClickTimeout = setTimeout(() => {
+    showWrongClick.value = false
+    lastWrongClick.value = null
+  }, 300)
 }
 
 // Обработка клика по ячейке
@@ -357,8 +405,14 @@ const onCellClick = (cell) => {
       currentNumber.value++
     }
   } else {
-    // Неправильная цифра - показываем подсказку
-    showNotificationMessage('info', `Ищите цифру ${currentNumber.value}`)
+    // Неправильная цифра
+    if (hintMode.value === 'with') {
+      // В режиме с подсказкой показываем сообщение
+      showNotificationMessage('info', `Ищите цифру ${currentNumber.value}`)
+    } else {
+      // В режиме без подсказки просто показываем визуальную обратную связь
+      showWrongClickFeedback(cell.value)
+    }
   }
 }
 
@@ -409,6 +463,9 @@ const showNotificationMessage = (type, message) => {
 // Очистка при размонтировании
 onUnmounted(() => {
   stopTimer()
+  if (wrongClickTimeout) {
+    clearTimeout(wrongClickTimeout)
+  }
 })
 
 // Загрузка статистики при монтировании
@@ -542,6 +599,14 @@ onMounted(() => {
   text-align: left;
 }
 
+.setting-hint {
+  color: var(--color-primary, #88d424);
+  font-size: 12px;
+  text-align: left;
+  margin: 0;
+  font-style: italic;
+}
+
 .size-buttons {
   display: flex;
   gap: 10px;
@@ -566,6 +631,37 @@ onMounted(() => {
 }
 
 .size-button.active {
+  background-color: var(--color-primary, #88d424);
+  border-color: var(--color-primary, #88d424);
+  color: white;
+}
+
+.hint-mode-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hint-mode-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid var(--color-light-gray, #e0e0e0);
+  border-radius: 8px;
+  background: none;
+  color: var(--color-gray, #9e9e9e);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hint-mode-button:hover {
+  border-color: var(--color-primary, #88d424);
+  color: var(--color-primary-dark, #6aa91c);
+}
+
+.hint-mode-button.active {
   background-color: var(--color-primary, #88d424);
   border-color: var(--color-primary, #88d424);
   color: white;
@@ -608,7 +704,7 @@ onMounted(() => {
 }
 
 .next-value {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-primary, #88d424);
   margin-left: 5px;
@@ -666,6 +762,13 @@ onMounted(() => {
   color: var(--color-primary-dark, #6aa91c);
   font-weight: 600;
   animation: pulse 1s ease infinite;
+}
+
+.table-cell.wrong-click {
+  border-color: var(--color-error, #f44336);
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--color-error, #f44336);
+  animation: shake 0.3s ease;
 }
 
 .table-cell:disabled {
@@ -828,6 +931,12 @@ onMounted(() => {
   50% { opacity: 0.5; }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 @media (max-width: 768px) {
   .game-header {
     flex-direction: column;
@@ -849,6 +958,14 @@ onMounted(() => {
   }
 
   .size-button {
+    width: 100%;
+  }
+
+  .hint-mode-buttons {
+    flex-direction: column;
+  }
+
+  .hint-mode-button {
     width: 100%;
   }
 
