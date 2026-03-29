@@ -56,6 +56,14 @@ const handleAuthChange = () => {
   checkAuth()
 }
 
+// Выход из системы
+const logout = () => {
+  authService.logout()
+  checkAuth()
+  window.dispatchEvent(new Event('auth-change'))
+  router.push('/login')
+}
+
 onMounted(() => {
   checkAuth()
 
@@ -65,8 +73,7 @@ onMounted(() => {
   // Слушаем кастомное событие (внутри текущей вкладки)
   window.addEventListener('auth-change', handleAuthChange)
 
-  // Периодическая проверка (на всякий случай)
-  const interval = setInterval(checkAuth, 1000)
+  const interval = setInterval(checkAuth, 2000)
 
   onUnmounted(() => {
     window.removeEventListener('storage', handleStorageChange)
@@ -74,14 +81,6 @@ onMounted(() => {
     clearInterval(interval)
   })
 })
-
-const logout = () => {
-  authService.logout()
-  checkAuth()
-  // Триггерим событие для других компонентов
-  window.dispatchEvent(new Event('auth-change'))
-  router.push('/login')
-}
 </script>
 
 <style scoped>
@@ -94,12 +93,12 @@ const logout = () => {
   left: 0;
   right: 0;
   z-index: 1000;
-  width: 100vw; /* Полная ширина viewport */
+  width: 100vw;
   margin: 0;
   padding: 0;
-  transform: translateZ(0); /* Для фиксации позиции */
-  backdrop-filter: blur(8px); /* Красивый эффект при прокрутке */
-  background-color: rgba(255, 255, 255, 0.95); /* Полупрозрачный фон */
+  transform: translateZ(0);
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .header-container {

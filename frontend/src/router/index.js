@@ -87,22 +87,26 @@ const router = createRouter({
     {
       path: '/help',
       name: 'help',
-      component: HelpView
+      component: HelpView,
+      meta: { requiresAuth: false }
     },
     {
       path: '/about',
       name: 'about',
-      component: AboutView
+      component: AboutView,
+      meta: { requiresAuth: false }
     },
     {
       path: '/login',
       name: 'login',
-      component: LoginView
+      component: LoginView,
+      meta: { requiresAuth: false }
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView
+      component: RegisterView,
+      meta: { requiresAuth: false }
     }
   ]
 })
@@ -111,11 +115,19 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('accessToken')
 
+  // Если маршрут требует авторизации
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if ((to.path === '/login' || to.path === '/register') && isAuthenticated) {
+    next('/about')
+  }
+  // Если пользователь уже авторизован и пытается зайти на страницу входа/регистрации
+  else if ((to.path === '/login' || to.path === '/register') && isAuthenticated) {
     next('/')
-  } else {
+  }
+  // Если это корневой путь и пользователь не авторизован
+  else if (to.path === '/' && !isAuthenticated) {
+    next('/about')
+  }
+  else {
     next()
   }
 })
