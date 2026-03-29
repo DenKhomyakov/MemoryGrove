@@ -117,7 +117,6 @@
 
         <!-- Режим редактирования -->
         <form v-else @submit.prevent="handleUpdateProfile" class="profile-form">
-          <!-- Неизменяемые поля (только для чтения) -->
           <div class="form-row">
             <TextField
               v-model="profileForm.email"
@@ -138,7 +137,6 @@
             />
           </div>
 
-          <!-- Изменяемые поля -->
           <div class="form-row">
             <TextField
               v-model="profileForm.surname"
@@ -190,7 +188,6 @@
             />
           </div>
 
-          <!-- Роль (только для чтения) -->
           <div class="form-row">
             <TextField
               v-model="profileForm.roleName"
@@ -430,9 +427,9 @@ import PasswordField from '@/components/UI/PasswordField.vue'
 import Button from '@/components/UI/Button.vue'
 import Notification from '@/components/UI/Notification.vue'
 import TelegramBinding from '@/components/TelegramBinding.vue'
+import ProfilePhotoUploader from '@/components/ProfilePhotoUploader.vue'
 import userService from '@/services/userService'
 import authService from '@/services/authService'
-import ProfilePhotoUploader from '@/components/ProfilePhotoUploader.vue'
 
 const router = useRouter()
 const activeTab = ref('profile')
@@ -561,7 +558,6 @@ const switchToProfileTab = () => {
 const switchToPasswordTab = () => {
   activeTab.value = 'password'
   isEditing.value = false
-  // Очищаем ошибки и форму пароля
   Object.keys(errors).forEach(key => {
     if (['currentPassword', 'newPassword', 'confirmNewPassword'].includes(key)) {
       errors[key] = ''
@@ -595,11 +591,19 @@ const switchToTelegramTab = () => {
 const switchToDeactivateTab = () => {
   activeTab.value = 'deactivate'
   isEditing.value = false
-  // Очищаем ошибки и форму деактивации
   errors.deactivateReason = ''
   errors.deactivatePassword = ''
   deactivateForm.reason = ''
   deactivateForm.password = ''
+}
+
+// Обработчик обновления фото
+const handlePhotoUpdated = (updatedUser) => {
+  if (updatedUser) {
+    userData.value = updatedUser
+  } else {
+    loadUserData()
+  }
 }
 
 // Начало редактирования
@@ -619,7 +623,6 @@ const startEditing = () => {
 // Отмена редактирования
 const cancelEditing = () => {
   isEditing.value = false
-  // Очищаем ошибки
   Object.keys(errors).forEach(key => {
     if (!['currentPassword', 'newPassword', 'confirmNewPassword', 'deactivateReason', 'deactivatePassword'].includes(key)) {
       errors[key] = ''
@@ -757,7 +760,6 @@ const validatePasswordForm = () => {
 // Валидация формы деактивации
 const validateDeactivateForm = () => {
   errors.deactivatePassword = ''
-
   let isValid = true
 
   if (!deactivateForm.password) {
@@ -789,8 +791,6 @@ const handleUpdateProfile = async () => {
     }
 
     const response = await userService.updateUser(userData.value.id, updateData)
-    console.log('✅ Профиль обновлён:', response)
-
     userData.value = response
     showNotificationMessage('success', 'Данные профиля успешно обновлены')
     isEditing.value = false
@@ -822,8 +822,6 @@ const handleChangePassword = async () => {
     }
 
     await userService.changePassword(userData.value.id, passwordData)
-    console.log('✅ Пароль изменён')
-
     showNotificationMessage('success', 'Пароль успешно изменён')
 
     passwordForm.currentPassword = ''
@@ -852,7 +850,6 @@ const handleChangePassword = async () => {
 const handleDeactivate = async () => {
   if (!validateDeactivateForm()) return
 
-  // Добавляем подтверждение
   if (!confirm('Вы уверены, что хотите деактивировать аккаунт? Это действие можно отменить повторным входом в систему.')) {
     return
   }
@@ -871,8 +868,6 @@ const handleDeactivate = async () => {
 
     // Если пароль верный, деактивируем аккаунт
     await userService.deactivateUser(userData.value.id, deactivateForm.reason)
-    console.log('✅ Аккаунт деактивирован')
-
     showNotificationMessage('success', 'Аккаунт успешно деактивирован')
 
     // Выходим из системы
@@ -891,17 +886,6 @@ const handleDeactivate = async () => {
   }
 }
 
-// Обработчик обновления фото
-const handlePhotoUpdated = (updatedUser) => {
-  if (updatedUser) {
-    userData.value = updatedUser
-  } else {
-    // Фото удалено, обновляем данные пользователя
-    loadUserData()
-  }
-}
-
-// При монтировании загружаем данные
 onMounted(() => {
   loadUserData()
 })
@@ -941,25 +925,28 @@ onMounted(() => {
   margin: 0;
 }
 
+/* Табы */
 .profile-tabs {
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 2rem;
-  border-bottom: 1px solid var(--color-light-gray, #e0e0e0);
   padding-bottom: 10px;
-  flex-wrap: wrap;
+  border-bottom: 1px solid var(--color-light-gray, #e0e0e0);
 }
 
 .tab-button {
   background: none;
   border: none;
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--color-gray, #9e9e9e);
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 8px;
+  white-space: nowrap;
 }
 
 .tab-button:hover {
@@ -1041,7 +1028,7 @@ onMounted(() => {
   margin-top: 2rem;
 }
 
-/* Стили для ID карточки (НОВЫЕ) */
+/* Карточка ID */
 .id-card {
   text-align: center;
   padding: 2rem;
@@ -1131,7 +1118,7 @@ onMounted(() => {
   border-top: 1px solid var(--color-light-gray, #e0e0e0);
 }
 
-/* Стили для предупреждения */
+/* Деактивация */
 .deactivate-warning {
   background-color: rgba(244, 67, 54, 0.1);
   border: 1px solid var(--color-error, #f44336);
@@ -1163,7 +1150,7 @@ onMounted(() => {
   font-style: italic;
 }
 
-/* Стили для загрузки */
+/* Загрузка */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -1189,7 +1176,7 @@ onMounted(() => {
   }
 }
 
-/* Стили для статуса аккаунта */
+/* Статус аккаунта */
 .account-status {
   margin-top: 2rem;
   padding-top: 1.5rem;
@@ -1227,7 +1214,12 @@ onMounted(() => {
   }
 
   .profile-tabs {
-    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tab-button {
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
   .info-item {
